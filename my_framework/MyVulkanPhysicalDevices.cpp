@@ -1,0 +1,62 @@
+//
+// Created by wangly on 2024/10/16.
+// 物理设备
+
+#include <stdexcept>
+#include <vector>
+#include "core.h"
+#include "MyVulkanPhysicalDevices.h"
+
+void MyVulkanPhysicalDevices::pickPhysicalDevice(VkInstance instance, VkPhysicalDevice *physicalDevice) {
+    // 获取显卡设备数量
+    uint32_t deviceCount = 0;
+    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+    //如果有 0 台设备支持 Vulkan，那么就没有必要再进一步了。
+    if (deviceCount == 0) {
+        throw std::runtime_error("failed to find GPUs with Vulkan support!");
+    }
+    //分配一个数组来保存所有 VkPhysicalDevice 句柄
+    std::vector<VkPhysicalDevice> devices(deviceCount);
+    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+    //检查是否有任何物理设备满足我们将添加到该功能中的要求
+    for (const auto &device: devices) {
+        if (isDeviceSuitable(device)) {
+            *physicalDevice = device;
+            break;
+        }
+    }
+
+    if (physicalDevice == VK_NULL_HANDLE) {
+        throw std::runtime_error("failed to find a suitable GPU!");
+    }
+}
+
+//评估物理设备中的每一个并检查它们是否适合我们想要执行的操作
+bool MyVulkanPhysicalDevices::isDeviceSuitable(VkPhysicalDevice device) {
+    QueueFamilyIndices indices = findQueueFamilies(device);
+    return indices.isComplete();
+}
+
+QueueFamilyIndices MyVulkanPhysicalDevices::findQueueFamilies(VkPhysicalDevice device) {
+    QueueFamilyIndices indices;
+    //检索队列列表
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+    //需要找到至少一个支持 VK_QUEUE_GRAPHICS_BIT
+    int i = 0;
+    for (const auto &queueFamily: queueFamilies) {
+        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            indices.graphicsFamily = i;
+        }
+        if (indices.isComplete()) {
+            break;
+        }
+        i++;
+    }
+    return indices;
+}

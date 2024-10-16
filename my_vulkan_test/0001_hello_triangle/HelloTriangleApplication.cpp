@@ -6,7 +6,6 @@
 #include "../../my_framework/MyVulkanPhysicalDevices.h"
 #include "../../my_framework/MyVulkanLogicalDevices.h"
 #include "../../my_framework/MyVulkanSurface.h"
-#include "../../my_framework/MyVulkanSwapChain.h"
 
 void HelloTriangleApplication::initWindow() {
     glfwInit();
@@ -27,8 +26,7 @@ void HelloTriangleApplication::initVulkan() {
     //创建逻辑设备
     MyVulkanLogicalDevices::createLogicalDevice(physicalDevice, &device, &graphicsQueue, surface, presentQueue);
     //创建交换链
-    MyVulkanSwapChain::createSwapChain(physicalDevice, surface, window, &swapChain, device, swapChainImages,
-                                       swapChainImageFormat, swapChainExtent);
+    myVulkanSwapChain.createSwapChain(physicalDevice, surface, window, &swapChain, device);
 }
 
 void HelloTriangleApplication::mainLoop() {

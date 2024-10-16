@@ -1,6 +1,6 @@
 //
 // Created by wangly on 2024/10/16.
-//
+// 交换链
 
 #include <vector>
 #include "core.h"
@@ -42,10 +42,15 @@ public:
     static VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities, GLFWwindow *window);
 
     //创建交换链
-    static void
-    createSwapChain(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, GLFWwindow *window,
-                    VkSwapchainKHR *swapChain,
-                    VkDevice device, std::vector<VkImage> swapChainImages, VkFormat &swapChainImageFormat,
-                    VkExtent2D &swapChainExtent);
+    void createSwapChain(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, GLFWwindow *window,
+                         VkSwapchainKHR *swapChain, VkDevice device);
+
+public:
+    //交换链图像
+    std::vector<VkImage> swapChainImages;
+    //交换链图像视图
+    VkFormat swapChainImageFormat;
+    //交换链扩展
+    VkExtent2D swapChainExtent;
 };
 

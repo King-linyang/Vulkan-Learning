@@ -107,10 +107,8 @@ VkExtent2D MyVulkanSwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &c
     }
 }
 
-void
-MyVulkanSwapChain::createSwapChain(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, GLFWwindow *window,
-                                   VkSwapchainKHR *swapChain, VkDevice device, std::vector<VkImage> swapChainImages,
-                                   VkFormat &swapChainImageFormat, VkExtent2D &swapChainExtent) {
+void MyVulkanSwapChain::createSwapChain(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, GLFWwindow *window,
+                                        VkSwapchainKHR *swapChain, VkDevice device) {
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice, surface);
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);

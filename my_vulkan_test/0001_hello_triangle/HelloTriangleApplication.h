@@ -5,6 +5,7 @@
 #pragma once
 
 #include "../../my_framework/core.h"
+#include "../../my_framework/MyVulkanSwapChain.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -19,7 +20,12 @@ public:
     // 实例化方法
     void run();
 
+public:
+    // 交换链
+    MyVulkanSwapChain myVulkanSwapChain;
 private:
+    // 窗口
+    GLFWwindow *window{};
     // vulkan 实例
     VkInstance instance{};
     //debug 信息
@@ -36,16 +42,7 @@ private:
     VkQueue presentQueue{};
     //交换链
     VkSwapchainKHR swapChain;
-    //交换链图像
-    std::vector<VkImage> swapChainImages;
-    //交换链图像视图
-    VkFormat swapChainImageFormat;
-    //交换链扩展
-    VkExtent2D swapChainExtent;
 private:
-    // 窗口
-    GLFWwindow *window{};
-
     // 初始化窗口
     void initWindow();
 

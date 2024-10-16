@@ -3,40 +3,8 @@
 //
 
 #include "MyVulkanSwapChain.h"
-#include <set>
 #include <algorithm>
 #include <stdexcept>
-
-bool MyVulkanSwapChain::isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface) {
-    QueueFamilyIndices indices = MyVulkanPhysicalDevices::findQueueFamilies(device, surface);
-
-    bool extensionsSupported = checkDeviceExtensionSupport(device);
-    //验证交换链支持是否足够
-    bool swapChainAdequate = false;
-    if (extensionsSupported) {
-        //至少有一种受支持的图像格式和一种受支持的演示模式
-        SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device, surface);
-        swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
-    }
-    return indices.isComplete() && extensionsSupported && swapChainAdequate;
-}
-
-bool MyVulkanSwapChain::checkDeviceExtensionSupport(VkPhysicalDevice device) {
-    //检查是否所有必需的扩展都包含在其中
-    uint32_t extensionCount;
-    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
-
-    std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
-
-    std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
-
-    for (const auto &extension: availableExtensions) {
-        requiredExtensions.erase(extension.extensionName);
-    }
-
-    return requiredExtensions.empty();
-}
 
 SwapChainSupportDetails MyVulkanSwapChain::querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface) {
     SwapChainSupportDetails details;

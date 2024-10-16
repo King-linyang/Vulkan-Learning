@@ -23,12 +23,6 @@ public:
 
     ~MyVulkanSwapChain() = default;
 
-    //设备是否合适
-    static bool isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface);
-
-    //检查设备是否支持
-    static bool checkDeviceExtensionSupport(VkPhysicalDevice device);
-
     //获取交换链支持详情
     static SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface);
 

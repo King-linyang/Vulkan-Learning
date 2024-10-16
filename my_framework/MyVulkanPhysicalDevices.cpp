@@ -4,10 +4,13 @@
 
 #include <stdexcept>
 #include <vector>
+#include <set>
 #include "core.h"
 #include "MyVulkanPhysicalDevices.h"
+#include "MyVulkanSwapChain.h"
 
-void MyVulkanPhysicalDevices::pickPhysicalDevice(VkInstance instance, VkPhysicalDevice *physicalDevice, VkSurfaceKHR surface) {
+void MyVulkanPhysicalDevices::pickPhysicalDevice(VkInstance instance, VkPhysicalDevice *physicalDevice,
+                                                 VkSurfaceKHR surface) {
     // 获取显卡设备数量
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
@@ -34,8 +37,34 @@ void MyVulkanPhysicalDevices::pickPhysicalDevice(VkInstance instance, VkPhysical
 
 //评估物理设备中的每一个并检查它们是否适合我们想要执行的操作
 bool MyVulkanPhysicalDevices::isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface) {
-    QueueFamilyIndices indices = findQueueFamilies(device, surface);
-    return indices.isComplete();
+    QueueFamilyIndices indices = MyVulkanPhysicalDevices::findQueueFamilies(device, surface);
+
+    bool extensionsSupported = checkDeviceExtensionSupport(device);
+    //验证交换链支持是否足够
+    bool swapChainAdequate = false;
+    if (extensionsSupported) {
+        //至少有一种受支持的图像格式和一种受支持的演示模式
+        SwapChainSupportDetails swapChainSupport = MyVulkanSwapChain::querySwapChainSupport(device, surface);
+        swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
+    }
+    return indices.isComplete() && extensionsSupported && swapChainAdequate;
+}
+
+bool MyVulkanPhysicalDevices::checkDeviceExtensionSupport(VkPhysicalDevice device) {
+    //检查是否所有必需的扩展都包含在其中
+    uint32_t extensionCount;
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+
+    std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+
+    std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+
+    for (const auto &extension: availableExtensions) {
+        requiredExtensions.erase(extension.extensionName);
+    }
+
+    return requiredExtensions.empty();
 }
 
 QueueFamilyIndices MyVulkanPhysicalDevices::findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface) {

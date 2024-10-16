@@ -7,7 +7,7 @@
 #include <iostream>
 
 int main() {
-    HelloTriangleApplication app{};
+    HelloTriangleApplication app = HelloTriangleApplication();
 
     try {
         app.run();

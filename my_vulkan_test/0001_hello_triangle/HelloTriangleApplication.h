@@ -5,7 +5,7 @@
 #pragma once
 
 #include "../../my_framework/core.h"
-#include "../../my_framework/MyVulkanSwapChain.h"
+#include "../../my_framework/MyVulkanImageView.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -17,13 +17,25 @@ const uint32_t HEIGHT = 600;
 
 class HelloTriangleApplication {
 public:
+    HelloTriangleApplication() {
+        myVulkanSwapChain = MyVulkanSwapChain();
+        myVulkanImageView = MyVulkanImageView();
+    }
+
+    ~HelloTriangleApplication() {
+        myVulkanSwapChain.~MyVulkanSwapChain();
+        myVulkanImageView.~MyVulkanImageView();
+    };
+
     // 实例化方法
     void run();
 
-public:
+private:
     // 交换链
     MyVulkanSwapChain myVulkanSwapChain;
-private:
+    //图像视图
+    MyVulkanImageView myVulkanImageView;
+
     // 窗口
     GLFWwindow *window{};
     // vulkan 实例

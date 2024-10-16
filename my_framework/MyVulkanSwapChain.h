@@ -2,6 +2,8 @@
 // Created by wangly on 2024/10/16.
 // 交换链
 
+#pragma once
+
 #include <vector>
 #include "core.h"
 #include "MyVulkanPhysicalDevices.h"
@@ -39,12 +41,18 @@ public:
     void createSwapChain(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, GLFWwindow *window,
                          VkSwapchainKHR *swapChain, VkDevice device);
 
-public:
+    //获取交换链图像
+    std::vector<VkImage> getSwapChainImages() { return swapChainImages; }
+
+    //获取交换链图像视图
+    VkFormat getSwapChainImageFormat() { return swapChainImageFormat; }
+
+private:
     //交换链图像
     std::vector<VkImage> swapChainImages;
     //交换链图像视图
     VkFormat swapChainImageFormat;
     //交换链扩展
-    VkExtent2D swapChainExtent;
+    VkExtent2D swapChainExtent{};
 };
 

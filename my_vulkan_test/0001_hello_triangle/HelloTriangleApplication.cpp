@@ -27,6 +27,8 @@ void HelloTriangleApplication::initVulkan() {
     MyVulkanLogicalDevices::createLogicalDevice(physicalDevice, &device, &graphicsQueue, surface, presentQueue);
     //创建交换链
     myVulkanSwapChain.createSwapChain(physicalDevice, surface, window, &swapChain, device);
+    //创建图像视图
+    myVulkanImageView.createImageViews(myVulkanSwapChain, device);
 }
 
 void HelloTriangleApplication::mainLoop() {
@@ -38,6 +40,8 @@ void HelloTriangleApplication::mainLoop() {
 }
 
 void HelloTriangleApplication::cleanup() {
+    //清理图像视图
+    myVulkanImageView.cleanUp(device);
     //清理交换链
     vkDestroySwapchainKHR(device, swapChain, nullptr);
     //销毁逻辑设备

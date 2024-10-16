@@ -9,3 +9,4 @@ set(CMAKE_CXX_STANDARD 17)
 
 # 添加子目录
 add_subdirectory(0001_hello_triangle)
+add_subdirectory(0002_hello_triangle)

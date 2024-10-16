@@ -7,7 +7,7 @@
 #include "core.h"
 #include "MyVulkanPhysicalDevices.h"
 
-void MyVulkanPhysicalDevices::pickPhysicalDevice(VkInstance instance, VkPhysicalDevice *physicalDevice) {
+void MyVulkanPhysicalDevices::pickPhysicalDevice(VkInstance instance, VkPhysicalDevice *physicalDevice, VkSurfaceKHR surface) {
     // 获取显卡设备数量
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
@@ -21,7 +21,7 @@ void MyVulkanPhysicalDevices::pickPhysicalDevice(VkInstance instance, VkPhysical
 
     //检查是否有任何物理设备满足我们将添加到该功能中的要求
     for (const auto &device: devices) {
-        if (isDeviceSuitable(device)) {
+        if (isDeviceSuitable(device, surface)) {
             *physicalDevice = device;
             break;
         }
@@ -33,12 +33,12 @@ void MyVulkanPhysicalDevices::pickPhysicalDevice(VkInstance instance, VkPhysical
 }
 
 //评估物理设备中的每一个并检查它们是否适合我们想要执行的操作
-bool MyVulkanPhysicalDevices::isDeviceSuitable(VkPhysicalDevice device) {
-    QueueFamilyIndices indices = findQueueFamilies(device);
+bool MyVulkanPhysicalDevices::isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface) {
+    QueueFamilyIndices indices = findQueueFamilies(device, surface);
     return indices.isComplete();
 }
 
-QueueFamilyIndices MyVulkanPhysicalDevices::findQueueFamilies(VkPhysicalDevice device) {
+QueueFamilyIndices MyVulkanPhysicalDevices::findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface) {
     QueueFamilyIndices indices;
     //检索队列列表
     uint32_t queueFamilyCount = 0;
@@ -53,6 +53,13 @@ QueueFamilyIndices MyVulkanPhysicalDevices::findQueueFamilies(VkPhysicalDevice d
         if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             indices.graphicsFamily = i;
         }
+        //查找能够呈现到窗口表面的队列系列
+        VkBool32 presentSupport = false;
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+        if (presentSupport) {
+            indices.presentFamily = i;
+        }
+
         if (indices.isComplete()) {
             break;
         }

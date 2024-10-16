@@ -5,6 +5,8 @@
 #include "../../my_framework/MyValidationLayers.h"
 #include "../../my_framework/MyVulkanPhysicalDevices.h"
 #include "../../my_framework/MyVulkanLogicalDevices.h"
+#include "../../my_framework/MyVulkanSurface.h"
+#include "../../my_framework/MyVulkanSwapChain.h"
 
 void HelloTriangleApplication::initWindow() {
     glfwInit();
@@ -18,10 +20,15 @@ void HelloTriangleApplication::initVulkan() {
     createInstance();
     //验证层
     MyValidationLayers::setupDebugMessenger(instance, debugMessenger);
+    //创建窗口表面
+    MyVulkanSurface::createSurface(instance, window, &surface);
     //选择物理设备
-    MyVulkanPhysicalDevices::pickPhysicalDevice(instance, &physicalDevice);
+    MyVulkanPhysicalDevices::pickPhysicalDevice(instance, &physicalDevice, surface);
     //创建逻辑设备
-    MyVulkanLogicalDevices::createLogicalDevice(physicalDevice, &device, &graphicsQueue);
+    MyVulkanLogicalDevices::createLogicalDevice(physicalDevice, &device, &graphicsQueue, surface, presentQueue);
+    //创建交换链
+    MyVulkanSwapChain::createSwapChain(physicalDevice, surface, window, &swapChain, device, swapChainImages,
+                                       swapChainImageFormat, swapChainExtent);
 }
 
 void HelloTriangleApplication::mainLoop() {
@@ -33,11 +40,15 @@ void HelloTriangleApplication::mainLoop() {
 }
 
 void HelloTriangleApplication::cleanup() {
+    //清理交换链
+    vkDestroySwapchainKHR(device, swapChain, nullptr);
     //销毁逻辑设备
     vkDestroyDevice(device, nullptr);
     if (enableValidationLayers) {
         MyValidationLayers::DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
     }
+    //销毁窗口表面
+    vkDestroySurfaceKHR(instance, surface, nullptr);
     //清理 vulkan 实例
     vkDestroyInstance(instance, nullptr);
     //清理窗口

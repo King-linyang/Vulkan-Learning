@@ -28,8 +28,20 @@ private:
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     //逻辑设备
     VkDevice device{};
-    //队列
+    //图形队列
     VkQueue graphicsQueue{};
+    //窗口表面
+    VkSurfaceKHR surface{};
+    //渲染队列
+    VkQueue presentQueue{};
+    //交换链
+    VkSwapchainKHR swapChain;
+    //交换链图像
+    std::vector<VkImage> swapChainImages;
+    //交换链图像视图
+    VkFormat swapChainImageFormat;
+    //交换链扩展
+    VkExtent2D swapChainExtent;
 private:
     // 窗口
     GLFWwindow *window{};

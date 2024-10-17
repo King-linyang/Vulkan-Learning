@@ -6,6 +6,7 @@
 
 #include "../../my_framework/core.h"
 #include "../../my_framework/MyVulkanImageView.h"
+#include "../../my_framework/MyVulkanGraphicsPipeline.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -20,6 +21,7 @@ public:
     HelloTriangleApplication() {
         myVulkanSwapChain = MyVulkanSwapChain();
         myVulkanImageView = MyVulkanImageView();
+        myVulkanGraphicsPipeline = MyVulkanGraphicsPipeline();
     }
 
     ~HelloTriangleApplication() {
@@ -35,6 +37,8 @@ private:
     MyVulkanSwapChain myVulkanSwapChain;
     //图像视图
     MyVulkanImageView myVulkanImageView;
+    //图形渲染管线
+    MyVulkanGraphicsPipeline myVulkanGraphicsPipeline;
 
     // 窗口
     GLFWwindow *window{};

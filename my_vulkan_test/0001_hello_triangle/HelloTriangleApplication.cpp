@@ -3,9 +3,9 @@
 //
 #include "HelloTriangleApplication.h"
 #include "../../my_framework/MyValidationLayers.h"
-#include "../../my_framework/MyVulkanPhysicalDevices.h"
 #include "../../my_framework/MyVulkanLogicalDevices.h"
 #include "../../my_framework/MyVulkanSurface.h"
+#include "../../my_framework/MyVulkanShaderCompile.h"
 
 void HelloTriangleApplication::initWindow() {
     glfwInit();
@@ -29,6 +29,15 @@ void HelloTriangleApplication::initVulkan() {
     myVulkanSwapChain.createSwapChain(physicalDevice, surface, window, &swapChain, device);
     //创建图像视图
     myVulkanImageView.createImageViews(myVulkanSwapChain, device);
+    //创建shader编译器
+    MyVulkanShaderCompile myVulkanShaderCompile = MyVulkanShaderCompile();
+    myVulkanShaderCompile.setShaderPath(
+            "E:\\A_learning_data\\vulkan_learning001\\vulkan_learing\\cmake-build-debug\\assets\\0001_shader\\");
+    myVulkanShaderCompile.setVertShaderName("vertex.vert");
+    myVulkanShaderCompile.setFragShaderName("fragment.frag");
+    myVulkanShaderCompile.compileShader();
+    //创建图形管线
+    myVulkanGraphicsPipeline.createGraphicsPipeline(myVulkanShaderCompile, device);
 }
 
 void HelloTriangleApplication::mainLoop() {

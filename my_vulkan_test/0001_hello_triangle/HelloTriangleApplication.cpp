@@ -2,10 +2,6 @@
 // Created by wangly on 2024/10/15.
 //
 #include "HelloTriangleApplication.h"
-#include "../../my_framework/MyValidationLayers.h"
-#include "../../my_framework/MyVulkanLogicalDevices.h"
-#include "../../my_framework/MyVulkanSurface.h"
-#include "../../my_framework/MyVulkanShaderCompile.h"
 
 void HelloTriangleApplication::initWindow() {
     glfwInit();
@@ -37,7 +33,8 @@ void HelloTriangleApplication::initVulkan() {
     myVulkanShaderCompile.setFragShaderName("fragment.frag");
     myVulkanShaderCompile.compileShader();
     //创建图形管线
-    myVulkanGraphicsPipeline.createGraphicsPipeline(myVulkanShaderCompile, device);
+    myVulkanGraphicsPipeline.createGraphicsPipeline(myVulkanShaderCompile, device, myVulkanSwapChain,
+                                                    myVulkanFixedFuncs);
 }
 
 void HelloTriangleApplication::mainLoop() {
@@ -49,6 +46,8 @@ void HelloTriangleApplication::mainLoop() {
 }
 
 void HelloTriangleApplication::cleanup() {
+    //清理图形管线
+    myVulkanGraphicsPipeline.cleanUp(device);
     //清理图像视图
     myVulkanImageView.cleanUp(device);
     //清理交换链

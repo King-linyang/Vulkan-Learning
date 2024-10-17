@@ -5,6 +5,8 @@
 #pragma once
 
 #include "MyVulkanShaderCompile.h"
+#include "MyVulkanSwapChain.h"
+#include "MyVulkanFixedFuncs.h"
 
 class MyVulkanGraphicsPipeline {
 public:
@@ -13,10 +15,20 @@ public:
     ~MyVulkanGraphicsPipeline() = default;
 
     //创建一个图形管线
-    void createGraphicsPipeline(MyVulkanShaderCompile myVulkanShaderCompile, VkDevice device);
+    void createGraphicsPipeline(MyVulkanShaderCompile myVulkanShaderCompile, VkDevice device,
+                                MyVulkanSwapChain myVulkanSwapChain, MyVulkanFixedFuncs myVulkanFixedFuncs);
 
     //创建着色器模块 采用一个以字节码为参数的缓冲区，并从中创建一个 VkShaderModule
     VkShaderModule createShaderModule(const std::vector<char> &code, VkDevice device);
+
+    //销毁管道
+    void cleanUp(VkDevice device) {
+        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+    }
+
+private:
+    //管线布局
+    VkPipelineLayout pipelineLayout;
 };
 
 

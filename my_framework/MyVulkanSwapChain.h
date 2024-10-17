@@ -47,6 +47,9 @@ public:
     //获取交换链图像视图
     VkFormat getSwapChainImageFormat() { return swapChainImageFormat; }
 
+    //获取交换链扩展
+    VkExtent2D getSwapChainExtent() { return swapChainExtent; }
+
 private:
     //交换链图像
     std::vector<VkImage> swapChainImages;

@@ -25,6 +25,8 @@ void HelloTriangleApplication::initVulkan() {
     myVulkanSwapChain.createSwapChain(physicalDevice, surface, window, &swapChain, device);
     //创建图像视图
     myVulkanImageView.createImageViews(myVulkanSwapChain, device);
+    //创建渲染过程
+    myVulkanRenderPass.createRenderPass(myVulkanSwapChain, device);
     //创建shader编译器
     MyVulkanShaderCompile myVulkanShaderCompile = MyVulkanShaderCompile();
     myVulkanShaderCompile.setShaderPath(
@@ -48,6 +50,8 @@ void HelloTriangleApplication::mainLoop() {
 void HelloTriangleApplication::cleanup() {
     //清理图形管线
     myVulkanGraphicsPipeline.cleanUp(device);
+    //清理渲染过程
+    myVulkanRenderPass.cleanUp(device);
     //清理图像视图
     myVulkanImageView.cleanUp(device);
     //清理交换链

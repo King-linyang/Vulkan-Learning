@@ -12,6 +12,7 @@
 #include "../../my_framework/MyVulkanSurface.h"
 #include "../../my_framework/MyVulkanShaderCompile.h"
 #include "../../my_framework/MyVulkanFixedFuncs.h"
+#include "../../my_framework/MyVulkanRenderPass.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -27,11 +28,16 @@ public:
         myVulkanSwapChain = MyVulkanSwapChain();
         myVulkanImageView = MyVulkanImageView();
         myVulkanGraphicsPipeline = MyVulkanGraphicsPipeline();
+        myVulkanFixedFuncs = MyVulkanFixedFuncs();
+        myVulkanRenderPass = MyVulkanRenderPass();
     }
 
     ~HelloTriangleApplication() {
         myVulkanSwapChain.~MyVulkanSwapChain();
         myVulkanImageView.~MyVulkanImageView();
+        myVulkanGraphicsPipeline.~MyVulkanGraphicsPipeline();
+        myVulkanFixedFuncs.~MyVulkanFixedFuncs();
+        myVulkanRenderPass.~MyVulkanRenderPass();
     };
 
     // 实例化方法
@@ -46,6 +52,8 @@ private:
     MyVulkanGraphicsPipeline myVulkanGraphicsPipeline;
     //固定功能
     MyVulkanFixedFuncs myVulkanFixedFuncs;
+    //渲染过程
+    MyVulkanRenderPass myVulkanRenderPass;
 
     // 窗口
     GLFWwindow *window{};

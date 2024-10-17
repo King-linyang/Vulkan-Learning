@@ -4,9 +4,10 @@
 
 #pragma once
 
+#include "MyVulkanSwapChain.h"
 #include <vector>
 #include "core.h"
-#include "MyVulkanSwapChain.h"
+#include <stdexcept>
 
 class MyVulkanImageView {
 public:
@@ -22,6 +23,11 @@ public:
 
     //销毁图像视图
     void cleanUp(VkDevice device);
+
+    //获取图像视图
+    std::vector<VkImageView> getSwapChainImageViews() {
+        return swapChainImageViews;
+    }
 
 private:
     //存储图像视图

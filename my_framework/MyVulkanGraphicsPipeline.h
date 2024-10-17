@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include <vector>
+#include <stdexcept>
+#include <iostream>
 #include "MyVulkanShaderCompile.h"
 #include "MyVulkanSwapChain.h"
 #include "MyVulkanFixedFuncs.h"

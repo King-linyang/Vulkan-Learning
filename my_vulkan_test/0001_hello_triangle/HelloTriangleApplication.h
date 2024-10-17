@@ -13,6 +13,7 @@
 #include "../../my_framework/MyVulkanShaderCompile.h"
 #include "../../my_framework/MyVulkanFixedFuncs.h"
 #include "../../my_framework/MyVulkanRenderPass.h"
+#include "../../my_framework/MyVulkanDraw.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -54,6 +55,8 @@ private:
     MyVulkanFixedFuncs myVulkanFixedFuncs;
     //渲染过程
     MyVulkanRenderPass myVulkanRenderPass;
+    //绘图
+    MyVulkanDraw myVulkanDraw;
 
     // 窗口
     GLFWwindow *window{};

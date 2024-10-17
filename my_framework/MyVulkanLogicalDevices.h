@@ -4,6 +4,13 @@
 
 #pragma once
 
+#include <stdexcept>
+#include <set>
+#include "core.h"
+#include "MyValidationLayers.h"
+#include "MyVulkanPhysicalDevices.h"
+#include "MyVulkanSwapChain.h"
+
 class MyVulkanLogicalDevices {
 public:
     MyVulkanLogicalDevices() = default;

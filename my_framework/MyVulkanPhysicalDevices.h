@@ -4,7 +4,12 @@
 
 #pragma once
 
+#include "MyVulkanSwapChain.h"
 #include <optional>
+#include <stdexcept>
+#include <vector>
+#include <set>
+#include "core.h"
 
 struct QueueFamilyIndices {
     //图形队列家族索引

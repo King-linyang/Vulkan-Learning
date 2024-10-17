@@ -7,6 +7,7 @@
 
 #include "core.h"
 #include <vector>
+#include <iostream>
 
 //vulkan 验证层
 const std::vector<const char *> validationLayers = {

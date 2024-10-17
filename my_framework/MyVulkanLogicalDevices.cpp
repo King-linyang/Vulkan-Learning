@@ -2,13 +2,7 @@
 // Created by wangly on 2024/10/16.
 // 逻辑设备
 
-#include <stdexcept>
-#include <set>
-#include "core.h"
-#include "MyValidationLayers.h"
 #include "MyVulkanLogicalDevices.h"
-#include "MyVulkanPhysicalDevices.h"
-#include "MyVulkanSwapChain.h"
 
 void
 MyVulkanLogicalDevices::createLogicalDevice(VkPhysicalDevice physicalDevice, VkDevice *device,

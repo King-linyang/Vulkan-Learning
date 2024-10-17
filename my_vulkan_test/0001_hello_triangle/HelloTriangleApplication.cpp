@@ -37,6 +37,8 @@ void HelloTriangleApplication::initVulkan() {
     //创建图形管线
     myVulkanGraphicsPipeline.createGraphicsPipeline(myVulkanShaderCompile, device, myVulkanSwapChain,
                                                     myVulkanFixedFuncs);
+    //创建帧缓冲
+    myVulkanDraw.createFrameBuffers(myVulkanImageView, myVulkanRenderPass, myVulkanSwapChain, device);
 }
 
 void HelloTriangleApplication::mainLoop() {
@@ -48,6 +50,8 @@ void HelloTriangleApplication::mainLoop() {
 }
 
 void HelloTriangleApplication::cleanup() {
+    //清理帧缓冲
+    myVulkanRenderPass.cleanUp(myVulkanDraw.getSwapChainFramebuffers(), device);
     //清理图形管线
     myVulkanGraphicsPipeline.cleanUp(device);
     //清理渲染过程

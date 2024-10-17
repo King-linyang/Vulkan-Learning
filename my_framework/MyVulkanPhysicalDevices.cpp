@@ -2,12 +2,7 @@
 // Created by wangly on 2024/10/16.
 // 物理设备
 
-#include <stdexcept>
-#include <vector>
-#include <set>
-#include "core.h"
 #include "MyVulkanPhysicalDevices.h"
-#include "MyVulkanSwapChain.h"
 
 void MyVulkanPhysicalDevices::pickPhysicalDevice(VkInstance instance, VkPhysicalDevice *physicalDevice,
                                                  VkSurfaceKHR surface) {

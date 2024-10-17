@@ -3,7 +3,6 @@
 // vulkan 验证层
 
 #include "MyValidationLayers.h"
-#include <iostream>
 
 // 检查是否所有请求的图层都可用
 bool MyValidationLayers::checkValidationLayerSupport() {

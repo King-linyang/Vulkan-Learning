@@ -3,8 +3,6 @@
 //
 
 #include "MyVulkanSwapChain.h"
-#include <algorithm>
-#include <stdexcept>
 
 SwapChainSupportDetails MyVulkanSwapChain::querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface) {
     SwapChainSupportDetails details;

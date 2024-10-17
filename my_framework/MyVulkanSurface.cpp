@@ -2,8 +2,7 @@
 // Created by wangly on 2024/10/16.
 //
 
-#include <stdexcept>
-#include "core.h"
+
 #include "MyVulkanSurface.h"
 
 

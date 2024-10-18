@@ -5,7 +5,7 @@
 #include "MyVulkanPhysicalDevices.h"
 
 void MyVulkanPhysicalDevices::pickPhysicalDevice(VkInstance *instance, VkPhysicalDevice *physicalDevice,
-                                                 VkSurfaceKHR surface) {
+                                                 VkSurfaceKHR *surface) {
     // 获取显卡设备数量
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(*instance, &deviceCount, nullptr);
@@ -19,7 +19,7 @@ void MyVulkanPhysicalDevices::pickPhysicalDevice(VkInstance *instance, VkPhysica
 
     //检查是否有任何物理设备满足我们将添加到该功能中的要求
     for (const auto &device: devices) {
-        if (isDeviceSuitable(device, surface)) {
+        if (isDeviceSuitable(device, *surface)) {
             *physicalDevice = device;
             break;
         }
@@ -32,7 +32,7 @@ void MyVulkanPhysicalDevices::pickPhysicalDevice(VkInstance *instance, VkPhysica
 
 //评估物理设备中的每一个并检查它们是否适合我们想要执行的操作
 bool MyVulkanPhysicalDevices::isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface) {
-    QueueFamilyIndices indices = MyVulkanPhysicalDevices::findQueueFamilies(device, surface);
+    QueueFamilyIndices indices = MyVulkanPhysicalDevices::findQueueFamilies(&device, &surface);
 
     bool extensionsSupported = checkDeviceExtensionSupport(device);
     //验证交换链支持是否足够
@@ -62,14 +62,14 @@ bool MyVulkanPhysicalDevices::checkDeviceExtensionSupport(VkPhysicalDevice devic
     return requiredExtensions.empty();
 }
 
-QueueFamilyIndices MyVulkanPhysicalDevices::findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface) {
+QueueFamilyIndices MyVulkanPhysicalDevices::findQueueFamilies(VkPhysicalDevice *device, VkSurfaceKHR *surface) {
     QueueFamilyIndices indices;
     //检索队列列表
     uint32_t queueFamilyCount = 0;
-    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+    vkGetPhysicalDeviceQueueFamilyProperties(*device, &queueFamilyCount, nullptr);
 
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+    vkGetPhysicalDeviceQueueFamilyProperties(*device, &queueFamilyCount, queueFamilies.data());
 
     //需要找到至少一个支持 VK_QUEUE_GRAPHICS_BIT
     int i = 0;
@@ -79,7 +79,7 @@ QueueFamilyIndices MyVulkanPhysicalDevices::findQueueFamilies(VkPhysicalDevice d
         }
         //查找能够呈现到窗口表面的队列系列
         VkBool32 presentSupport = false;
-        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+        vkGetPhysicalDeviceSurfaceSupportKHR(*device, i, *surface, &presentSupport);
         if (presentSupport) {
             indices.presentFamily = i;
         }

@@ -73,9 +73,9 @@ VkExtent2D MyVulkanSwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &c
     }
 }
 
-void MyVulkanSwapChain::createSwapChain(VkPhysicalDevice *physicalDevice, VkSurfaceKHR surface, GLFWwindow *window,
+void MyVulkanSwapChain::createSwapChain(VkPhysicalDevice *physicalDevice, VkSurfaceKHR *surface, GLFWwindow *window,
                                         VkSwapchainKHR *swapChain, VkDevice *device) {
-    SwapChainSupportDetails swapChainSupport = querySwapChainSupport(*physicalDevice, surface);
+    SwapChainSupportDetails swapChainSupport = querySwapChainSupport(*physicalDevice, *surface);
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -91,7 +91,7 @@ void MyVulkanSwapChain::createSwapChain(VkPhysicalDevice *physicalDevice, VkSurf
 
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    createInfo.surface = surface;
+    createInfo.surface = *surface;
     //指定交换链应绑定到哪个图面后，指定交换链映像的详细信息
     createInfo.minImageCount = imageCount;
     createInfo.imageFormat = surfaceFormat.format;
@@ -101,7 +101,7 @@ void MyVulkanSwapChain::createSwapChain(VkPhysicalDevice *physicalDevice, VkSurf
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    QueueFamilyIndices indices = MyVulkanPhysicalDevices::findQueueFamilies(*physicalDevice, surface);
+    QueueFamilyIndices indices = MyVulkanPhysicalDevices::findQueueFamilies(physicalDevice, surface);
     uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
     if (indices.graphicsFamily != indices.presentFamily) {

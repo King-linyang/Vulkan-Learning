@@ -29,8 +29,8 @@ void MyVulkanDraw::createFrameBuffers(MyVulkanImageView myVulkanImageView, MyVul
     }
 }
 
-void MyVulkanDraw::createCommandPool(VkPhysicalDevice *physicalDevice, VkSurfaceKHR surface, VkDevice *device) {
-    QueueFamilyIndices queueFamilyIndices = MyVulkanPhysicalDevices::findQueueFamilies(*physicalDevice, surface);
+void MyVulkanDraw::createCommandPool(VkPhysicalDevice *physicalDevice, VkSurfaceKHR *surface, VkDevice *device) {
+    QueueFamilyIndices queueFamilyIndices = MyVulkanPhysicalDevices::findQueueFamilies(physicalDevice, surface);
 
     VkCommandPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;

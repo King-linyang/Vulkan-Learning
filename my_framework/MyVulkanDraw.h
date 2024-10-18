@@ -21,7 +21,7 @@ public:
                             MyVulkanSwapChain myVulkanSwapChain, VkDevice *device);
 
     //创建命令池
-    void createCommandPool(VkPhysicalDevice *physicalDevice, VkSurfaceKHR surface, VkDevice *device);
+    void createCommandPool(VkPhysicalDevice *physicalDevice, VkSurfaceKHR *surface, VkDevice *device);
 
     //创建命令缓冲区
     void createCommandBuffer(VkDevice *device);

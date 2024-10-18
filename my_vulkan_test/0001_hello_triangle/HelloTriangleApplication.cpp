@@ -18,11 +18,11 @@ void HelloTriangleApplication::initVulkan() {
     //创建窗口表面
     MyVulkanSurface::createSurface(&instance, window, &surface);
     //选择物理设备
-    MyVulkanPhysicalDevices::pickPhysicalDevice(&instance, &physicalDevice, surface);
+    MyVulkanPhysicalDevices::pickPhysicalDevice(&instance, &physicalDevice, &surface);
     //创建逻辑设备
-    MyVulkanLogicalDevices::createLogicalDevice(&physicalDevice, &device, &graphicsQueue, surface, presentQueue);
+    MyVulkanLogicalDevices::createLogicalDevice(&physicalDevice, &device, &graphicsQueue, &surface, presentQueue);
     //创建交换链
-    myVulkanSwapChain.createSwapChain(&physicalDevice, surface, window, &swapChain, &device);
+    myVulkanSwapChain.createSwapChain(&physicalDevice, &surface, window, &swapChain, &device);
     //创建图像视图
     myVulkanImageView.createImageViews(myVulkanSwapChain, &device);
     //创建渲染过程
@@ -41,7 +41,7 @@ void HelloTriangleApplication::initVulkan() {
     //创建帧缓冲
     myVulkanDraw.createFrameBuffers(myVulkanImageView, myVulkanRenderPass, myVulkanSwapChain, &device);
     //创建命令池
-    myVulkanDraw.createCommandPool(&physicalDevice, surface, &device);
+    myVulkanDraw.createCommandPool(&physicalDevice, &surface, &device);
     //创建命令缓冲
     myVulkanDraw.createCommandBuffer(&device);
     //创建同步对象

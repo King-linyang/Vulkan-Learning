@@ -40,7 +40,7 @@ public:
     static VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities, GLFWwindow *window);
 
     //创建交换链
-    void createSwapChain(VkPhysicalDevice *physicalDevice, VkSurfaceKHR surface, GLFWwindow *window,
+    void createSwapChain(VkPhysicalDevice *physicalDevice, VkSurfaceKHR *surface, GLFWwindow *window,
                          VkSwapchainKHR *swapChain, VkDevice *device);
 
     //获取交换链图像

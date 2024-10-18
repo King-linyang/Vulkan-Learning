@@ -6,9 +6,9 @@
 
 void
 MyVulkanLogicalDevices::createLogicalDevice(VkPhysicalDevice *physicalDevice, VkDevice *device,
-                                            VkQueue *graphicsQueue, VkSurfaceKHR surface, VkQueue presentQueue) {
+                                            VkQueue *graphicsQueue, VkSurfaceKHR *surface, VkQueue presentQueue) {
     //单个队列系列的队列数量
-    QueueFamilyIndices indices = MyVulkanPhysicalDevices::findQueueFamilies(*physicalDevice, surface);
+    QueueFamilyIndices indices = MyVulkanPhysicalDevices::findQueueFamilies(physicalDevice, surface);
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     std::set<uint32_t> uniqueQueueFamilies = {

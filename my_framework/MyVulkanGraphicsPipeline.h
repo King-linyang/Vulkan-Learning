@@ -19,7 +19,8 @@ public:
 
     //创建一个图形管线
     void createGraphicsPipeline(MyVulkanShaderCompile myVulkanShaderCompile, VkDevice device,
-                                MyVulkanSwapChain myVulkanSwapChain, MyVulkanFixedFuncs myVulkanFixedFuncs);
+                                MyVulkanSwapChain &myVulkanSwapChain, MyVulkanFixedFuncs myVulkanFixedFuncs,
+                                VkRenderPass renderPass, VkPipeline pT);
 
     //创建着色器模块 采用一个以字节码为参数的缓冲区，并从中创建一个 VkShaderModule
     VkShaderModule createShaderModule(const std::vector<char> &code, VkDevice device);
@@ -29,9 +30,21 @@ public:
         vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
     }
 
+    //获取图形管线
+    VkPipeline getGraphicsPipeline() {
+        return graphicsPipeline;
+    }
+
+    //获取管线布局
+    VkPipelineLayout getPipelineLayout() {
+        return pipelineLayout;
+    }
+
 private:
     //管线布局
     VkPipelineLayout pipelineLayout;
+    //图形管线
+    VkPipeline graphicsPipeline;
 };
 
 

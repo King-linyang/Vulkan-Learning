@@ -36,9 +36,16 @@ void HelloTriangleApplication::initVulkan() {
     myVulkanShaderCompile.compileShader();
     //创建图形管线
     myVulkanGraphicsPipeline.createGraphicsPipeline(myVulkanShaderCompile, device, myVulkanSwapChain,
-                                                    myVulkanFixedFuncs);
+                                                    myVulkanFixedFuncs, myVulkanRenderPass.getRenderPass(),
+                                                    myVulkanGraphicsPipeline.getGraphicsPipeline());
     //创建帧缓冲
     myVulkanDraw.createFrameBuffers(myVulkanImageView, myVulkanRenderPass, myVulkanSwapChain, device);
+    //创建命令池
+    myVulkanDraw.createCommandPool(physicalDevice, surface, device);
+    //创建命令缓冲
+    myVulkanDraw.createCommandBuffer(device);
+    //创建同步对象
+//    myVulkanDraw.createSyncObjects(device);
 }
 
 void HelloTriangleApplication::mainLoop() {
@@ -46,10 +53,18 @@ void HelloTriangleApplication::mainLoop() {
     while (!glfwWindowShouldClose(window)) {
         //glfw事件
         glfwPollEvents();
+        //渲染
+//        myVulkanDraw.drawFrame(device, swapChain, myVulkanRenderPass.getRenderPass(),
+//                               myVulkanSwapChain.getSwapChainExtent(), myVulkanGraphicsPipeline.getGraphicsPipeline(),
+//                               graphicsQueue, presentQueue);
     }
 }
 
 void HelloTriangleApplication::cleanup() {
+    //清理同步对象
+//    myVulkanDraw.cleanUpSyncObjects(device);
+    //清理命令池
+    myVulkanDraw.cleanUpCommandPool(device);
     //清理帧缓冲
     myVulkanRenderPass.cleanUp(myVulkanDraw.getSwapChainFramebuffers(), device);
     //清理图形管线

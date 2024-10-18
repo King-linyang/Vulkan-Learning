@@ -16,6 +16,8 @@ public:
     ~MyVulkanFixedFuncs() = default;
 
     //创建一个绘制三角形的功能
-    void createTriangle(MyVulkanSwapChain myVulkanSwapChain, VkDevice device, VkPipelineLayout pipelineLayout);
+    void createTriangle(MyVulkanSwapChain myVulkanSwapChain, VkDevice device, VkPipelineLayout pipelineLayout,
+                        VkPipelineShaderStageCreateInfo shaderStages[], VkRenderPass renderPass,
+                        VkPipeline graphicsPipeline);
 };
 

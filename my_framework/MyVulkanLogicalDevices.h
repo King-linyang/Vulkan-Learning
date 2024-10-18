@@ -20,5 +20,5 @@ public:
     //创建逻辑设备
     static void
     createLogicalDevice(VkPhysicalDevice *physicalDevice, VkDevice *device, VkQueue *graphicsQueue, VkSurfaceKHR *surface,
-                        VkQueue presentQueue);
+                        VkQueue *presentQueue);
 };

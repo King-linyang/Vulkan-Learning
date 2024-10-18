@@ -6,7 +6,7 @@
 
 void
 MyVulkanLogicalDevices::createLogicalDevice(VkPhysicalDevice *physicalDevice, VkDevice *device,
-                                            VkQueue *graphicsQueue, VkSurfaceKHR *surface, VkQueue presentQueue) {
+                                            VkQueue *graphicsQueue, VkSurfaceKHR *surface, VkQueue *presentQueue) {
     //单个队列系列的队列数量
     QueueFamilyIndices indices = MyVulkanPhysicalDevices::findQueueFamilies(physicalDevice, surface);
 
@@ -54,5 +54,5 @@ MyVulkanLogicalDevices::createLogicalDevice(VkPhysicalDevice *physicalDevice, Vk
     }
     //检索队列句柄
     vkGetDeviceQueue(*device, indices.graphicsFamily.value(), 0, graphicsQueue);
-    vkGetDeviceQueue(*device, indices.presentFamily.value(), 0, &presentQueue);
+    vkGetDeviceQueue(*device, indices.presentFamily.value(), 0, presentQueue);
 }

@@ -60,7 +60,7 @@ private:
 
     // 窗口
     GLFWwindow *window{};
-    // vulkan 实例
+    // vulkan 实例，实例只有一个
     VkInstance instance{};
     //debug 信息
     VkDebugUtilsMessengerEXT debugMessenger{};

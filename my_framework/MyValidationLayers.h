@@ -41,7 +41,7 @@ public:
             void *pUserData);
 
     // 设置调试信息
-    static void setupDebugMessenger(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger);
+    static void setupDebugMessenger(VkInstance instance, VkDebugUtilsMessengerEXT *debugMessenger);
 
     static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
 

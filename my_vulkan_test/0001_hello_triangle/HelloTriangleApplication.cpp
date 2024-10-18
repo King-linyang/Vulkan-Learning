@@ -14,7 +14,7 @@ void HelloTriangleApplication::initVulkan() {
     //创建实例
     createInstance();
     //验证层
-    MyValidationLayers::setupDebugMessenger(instance, debugMessenger);
+    MyValidationLayers::setupDebugMessenger(instance, &debugMessenger);
     //创建窗口表面
     MyVulkanSurface::createSurface(instance, window, &surface);
     //选择物理设备
@@ -121,7 +121,7 @@ void HelloTriangleApplication::createInstance() {
         createInfo.pNext = nullptr;
     }
     if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create instance!");
+        throw std::runtime_error("failed to create instance! 创建 vulkan 实例失败!");
     }
 }
 

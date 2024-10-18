@@ -48,12 +48,12 @@ VkBool32 MyValidationLayers::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEX
     return VK_FALSE;
 }
 
-void MyValidationLayers::setupDebugMessenger(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger) {
+void MyValidationLayers::setupDebugMessenger(VkInstance instance, VkDebugUtilsMessengerEXT *debugMessenger) {
     if (!enableValidationLayers) return;
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
     populateDebugMessengerCreateInfo(createInfo);
 
-    if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
+    if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, debugMessenger) != VK_SUCCESS) {
         throw std::runtime_error("failed to set up debug messenger!");
     }
 }

@@ -5,10 +5,10 @@
 #include "MyVulkanLogicalDevices.h"
 
 void
-MyVulkanLogicalDevices::createLogicalDevice(VkPhysicalDevice physicalDevice, VkDevice *device,
+MyVulkanLogicalDevices::createLogicalDevice(VkPhysicalDevice *physicalDevice, VkDevice *device,
                                             VkQueue *graphicsQueue, VkSurfaceKHR surface, VkQueue presentQueue) {
     //单个队列系列的队列数量
-    QueueFamilyIndices indices = MyVulkanPhysicalDevices::findQueueFamilies(physicalDevice, surface);
+    QueueFamilyIndices indices = MyVulkanPhysicalDevices::findQueueFamilies(*physicalDevice, surface);
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     std::set<uint32_t> uniqueQueueFamilies = {
@@ -49,7 +49,7 @@ MyVulkanLogicalDevices::createLogicalDevice(VkPhysicalDevice physicalDevice, VkD
         createInfo.enabledLayerCount = 0;
     }
 
-    if (vkCreateDevice(physicalDevice, &createInfo, nullptr, device) != VK_SUCCESS) {
+    if (vkCreateDevice(*physicalDevice, &createInfo, nullptr, device) != VK_SUCCESS) {
         throw std::runtime_error("failed to create logical device!");
     }
     //检索队列句柄

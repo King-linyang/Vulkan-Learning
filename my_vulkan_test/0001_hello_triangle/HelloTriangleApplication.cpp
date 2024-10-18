@@ -20,7 +20,7 @@ void HelloTriangleApplication::initVulkan() {
     //选择物理设备
     MyVulkanPhysicalDevices::pickPhysicalDevice(instance, &physicalDevice, surface);
     //创建逻辑设备
-    MyVulkanLogicalDevices::createLogicalDevice(physicalDevice, &device, &graphicsQueue, surface, presentQueue);
+    MyVulkanLogicalDevices::createLogicalDevice(&physicalDevice, &device, &graphicsQueue, surface, presentQueue);
     //创建交换链
     myVulkanSwapChain.createSwapChain(physicalDevice, surface, window, &swapChain, device);
     //创建图像视图

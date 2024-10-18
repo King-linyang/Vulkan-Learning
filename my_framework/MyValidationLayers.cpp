@@ -82,11 +82,11 @@ VkResult MyValidationLayers::CreateDebugUtilsMessengerEXT(VkInstance instance,
     }
 }
 
-void MyValidationLayers::DestroyDebugUtilsMessengerEXT(VkInstance *instance, VkDebugUtilsMessengerEXT debugMessenger,
+void MyValidationLayers::DestroyDebugUtilsMessengerEXT(VkInstance *instance, VkDebugUtilsMessengerEXT *debugMessenger,
                                                        const VkAllocationCallbacks *pAllocator) {
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(*instance,
                                                                             "vkDestroyDebugUtilsMessengerEXT");
     if (func != nullptr) {
-        func(*instance, debugMessenger, pAllocator);
+        func(*instance, *debugMessenger, pAllocator);
     }
 }

@@ -78,7 +78,7 @@ void HelloTriangleApplication::cleanup() {
     //销毁逻辑设备
     vkDestroyDevice(device, nullptr);
     if (enableValidationLayers) {
-        MyValidationLayers::DestroyDebugUtilsMessengerEXT(&instance, debugMessenger, nullptr);
+        MyValidationLayers::DestroyDebugUtilsMessengerEXT(&instance, &debugMessenger, nullptr);
     }
     //销毁窗口表面
     vkDestroySurfaceKHR(instance, surface, nullptr);

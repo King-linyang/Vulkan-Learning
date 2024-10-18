@@ -64,15 +64,15 @@ void HelloTriangleApplication::cleanup() {
     //清理同步对象
 //    myVulkanDraw.cleanUpSyncObjects(device);
     //清理命令池
-    myVulkanDraw.cleanUpCommandPool(device);
+    myVulkanDraw.cleanUpCommandPool(&device);
     //清理帧缓冲
-    myVulkanRenderPass.cleanUp(myVulkanDraw.getSwapChainFramebuffers(), device);
+    myVulkanRenderPass.cleanUp(myVulkanDraw.getSwapChainFramebuffers(), &device);
     //清理图形管线
-    myVulkanGraphicsPipeline.cleanUp(device);
+    myVulkanGraphicsPipeline.cleanUp(&device);
     //清理渲染过程
-    myVulkanRenderPass.cleanUp(device);
+    myVulkanRenderPass.cleanUp(&device);
     //清理图像视图
-    myVulkanImageView.cleanUp(device);
+    myVulkanImageView.cleanUp(&device);
     //清理交换链
     vkDestroySwapchainKHR(device, swapChain, nullptr);
     //销毁逻辑设备

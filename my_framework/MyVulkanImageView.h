@@ -22,7 +22,12 @@ public:
     std::vector<VkImageView> getImageViews() { return swapChainImageViews; }
 
     //销毁图像视图
-    void cleanUp(VkDevice device);
+    void cleanUp(VkDevice *device) {
+        //清理图像视图
+        for (auto imageView: swapChainImageViews) {
+            vkDestroyImageView(*device, imageView, nullptr);
+        }
+    }
 
     //获取图像视图
     std::vector<VkImageView> getSwapChainImageViews() {

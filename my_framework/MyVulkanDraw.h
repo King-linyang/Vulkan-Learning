@@ -44,8 +44,8 @@ public:
     }
 
     //清理命令池
-    void cleanUpCommandPool(VkDevice device) {
-        vkDestroyCommandPool(device, commandPool, nullptr);
+    void cleanUpCommandPool(VkDevice *device) {
+        vkDestroyCommandPool(*device, commandPool, nullptr);
     }
 
     //清理同步对象

@@ -18,8 +18,8 @@ public:
     void createRenderPass(MyVulkanSwapChain myVulkanSwapChain, VkDevice *device);
 
     //清理工作
-    void cleanUp(VkDevice device) {
-        vkDestroyRenderPass(device, renderPass, nullptr);
+    void cleanUp(VkDevice *device) {
+        vkDestroyRenderPass(*device, renderPass, nullptr);
     }
 
     //获取渲染通道
@@ -28,9 +28,9 @@ public:
     }
 
     //清理帧缓冲
-    void cleanUp(const std::vector<VkFramebuffer>& swapChainFramebuffers, VkDevice device) {
+    void cleanUp(const std::vector<VkFramebuffer>& swapChainFramebuffers, VkDevice *device) {
         for (auto framebuffer: swapChainFramebuffers) {
-            vkDestroyFramebuffer(device, framebuffer, nullptr);
+            vkDestroyFramebuffer(*device, framebuffer, nullptr);
         }
     }
 

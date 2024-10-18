@@ -38,10 +38,3 @@ MyVulkanImageView::createImageViews(MyVulkanSwapChain myVulkanSwapChain, VkDevic
         }
     }
 }
-
-void MyVulkanImageView::cleanUp(VkDevice device) {
-    //清理图像视图
-    for (auto imageView: swapChainImageViews) {
-        vkDestroyImageView(device, imageView, nullptr);
-    }
-}

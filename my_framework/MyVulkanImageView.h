@@ -16,7 +16,7 @@ public:
     ~MyVulkanImageView() = default;
 
     //创建图像视图
-    void createImageViews(MyVulkanSwapChain myVulkanSwapChain, VkDevice device);
+    void createImageViews(MyVulkanSwapChain myVulkanSwapChain, VkDevice *device);
 
     //获取图像视图
     std::vector<VkImageView> getImageViews() { return swapChainImageViews; }

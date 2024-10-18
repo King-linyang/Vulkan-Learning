@@ -15,7 +15,7 @@ public:
     ~MyVulkanRenderPass() = default;
 
     //创建渲染过程
-    void createRenderPass(MyVulkanSwapChain myVulkanSwapChain, VkDevice device);
+    void createRenderPass(MyVulkanSwapChain myVulkanSwapChain, VkDevice *device);
 
     //清理工作
     void cleanUp(VkDevice device) {

@@ -6,7 +6,7 @@
 
 #include "MyVulkanGraphicsPipeline.h"
 
-void MyVulkanGraphicsPipeline::createGraphicsPipeline(MyVulkanShaderCompile myVulkanShaderCompile, VkDevice device,
+void MyVulkanGraphicsPipeline::createGraphicsPipeline(MyVulkanShaderCompile myVulkanShaderCompile, VkDevice *device,
                                                       MyVulkanSwapChain &myVulkanSwapChain,
                                                       MyVulkanFixedFuncs myVulkanFixedFuncs,
                                                       VkRenderPass renderPass, VkPipeline graphicsPipeline) {
@@ -14,8 +14,8 @@ void MyVulkanGraphicsPipeline::createGraphicsPipeline(MyVulkanShaderCompile myVu
     std::vector<char> vertShaderCode = myVulkanShaderCompile.loadShader("vertex.vert");
     std::vector<char> fragShaderCode = myVulkanShaderCompile.loadShader("fragment.frag");
 
-    VkShaderModule vertShaderModule = createShaderModule(vertShaderCode, device);
-    VkShaderModule fragShaderModule = createShaderModule(fragShaderCode, device);
+    VkShaderModule vertShaderModule = createShaderModule(vertShaderCode, *device);
+    VkShaderModule fragShaderModule = createShaderModule(fragShaderCode, *device);
 
     //通过 VkPipelineShaderStageCreateInfo 结构将它们分配到特定的管道阶段。以使用着色器
     //告诉 Vulkan 将在哪个管道阶段使用着色器
@@ -37,13 +37,13 @@ void MyVulkanGraphicsPipeline::createGraphicsPipeline(MyVulkanShaderCompile myVu
     VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
     //固定功能
-    myVulkanFixedFuncs.createTriangle(myVulkanSwapChain, device, pipelineLayout, shaderStages, renderPass,
+    myVulkanFixedFuncs.createTriangle(myVulkanSwapChain, *device, pipelineLayout, shaderStages, renderPass,
                                       graphicsPipeline);
 
 
     //管道创建完成，销毁着色器模块
-    vkDestroyShaderModule(device, fragShaderModule, nullptr);
-    vkDestroyShaderModule(device, vertShaderModule, nullptr);
+    vkDestroyShaderModule(*device, fragShaderModule, nullptr);
+    vkDestroyShaderModule(*device, vertShaderModule, nullptr);
 }
 
 VkShaderModule MyVulkanGraphicsPipeline::createShaderModule(const std::vector<char> &code, VkDevice device) {

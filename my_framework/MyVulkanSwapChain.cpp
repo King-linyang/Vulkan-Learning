@@ -74,7 +74,7 @@ VkExtent2D MyVulkanSwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &c
 }
 
 void MyVulkanSwapChain::createSwapChain(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, GLFWwindow *window,
-                                        VkSwapchainKHR *swapChain, VkDevice device) {
+                                        VkSwapchainKHR *swapChain, VkDevice *device) {
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice, surface);
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -121,13 +121,13 @@ void MyVulkanSwapChain::createSwapChain(VkPhysicalDevice physicalDevice, VkSurfa
     createInfo.clipped = VK_TRUE;
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-    if (vkCreateSwapchainKHR(device, &createInfo, nullptr, swapChain) != VK_SUCCESS) {
+    if (vkCreateSwapchainKHR(*device, &createInfo, nullptr, swapChain) != VK_SUCCESS) {
         throw std::runtime_error("failed to create swap chain!");
     }
 
-    vkGetSwapchainImagesKHR(device, *swapChain, &imageCount, nullptr);
+    vkGetSwapchainImagesKHR(*device, *swapChain, &imageCount, nullptr);
     swapChainImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(device, *swapChain, &imageCount, swapChainImages.data());
+    vkGetSwapchainImagesKHR(*device, *swapChain, &imageCount, swapChainImages.data());
     //交换链图像选择的格式和范围存储在成员变量中
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;

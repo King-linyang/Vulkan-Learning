@@ -22,11 +22,11 @@ void HelloTriangleApplication::initVulkan() {
     //创建逻辑设备
     MyVulkanLogicalDevices::createLogicalDevice(&physicalDevice, &device, &graphicsQueue, surface, presentQueue);
     //创建交换链
-    myVulkanSwapChain.createSwapChain(physicalDevice, surface, window, &swapChain, device);
+    myVulkanSwapChain.createSwapChain(physicalDevice, surface, window, &swapChain, &device);
     //创建图像视图
-    myVulkanImageView.createImageViews(myVulkanSwapChain, device);
+    myVulkanImageView.createImageViews(myVulkanSwapChain, &device);
     //创建渲染过程
-    myVulkanRenderPass.createRenderPass(myVulkanSwapChain, device);
+    myVulkanRenderPass.createRenderPass(myVulkanSwapChain, &device);
     //创建shader编译器
     MyVulkanShaderCompile myVulkanShaderCompile = MyVulkanShaderCompile();
     myVulkanShaderCompile.setShaderPath(
@@ -35,15 +35,15 @@ void HelloTriangleApplication::initVulkan() {
     myVulkanShaderCompile.setFragShaderName("fragment.frag");
     myVulkanShaderCompile.compileShader();
     //创建图形管线
-    myVulkanGraphicsPipeline.createGraphicsPipeline(myVulkanShaderCompile, device, myVulkanSwapChain,
+    myVulkanGraphicsPipeline.createGraphicsPipeline(myVulkanShaderCompile, &device, myVulkanSwapChain,
                                                     myVulkanFixedFuncs, myVulkanRenderPass.getRenderPass(),
                                                     myVulkanGraphicsPipeline.getGraphicsPipeline());
     //创建帧缓冲
-    myVulkanDraw.createFrameBuffers(myVulkanImageView, myVulkanRenderPass, myVulkanSwapChain, device);
+    myVulkanDraw.createFrameBuffers(myVulkanImageView, myVulkanRenderPass, myVulkanSwapChain, &device);
     //创建命令池
-    myVulkanDraw.createCommandPool(physicalDevice, surface, device);
+    myVulkanDraw.createCommandPool(physicalDevice, surface, &device);
     //创建命令缓冲
-    myVulkanDraw.createCommandBuffer(device);
+    myVulkanDraw.createCommandBuffer(&device);
     //创建同步对象
 //    myVulkanDraw.createSyncObjects(device);
 }

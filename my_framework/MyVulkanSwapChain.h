@@ -41,7 +41,7 @@ public:
 
     //创建交换链
     void createSwapChain(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, GLFWwindow *window,
-                         VkSwapchainKHR *swapChain, VkDevice device);
+                         VkSwapchainKHR *swapChain, VkDevice *device);
 
     //获取交换链图像
     std::vector<VkImage> getSwapChainImages() { return swapChainImages; }

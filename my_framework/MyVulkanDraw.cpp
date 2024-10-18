@@ -6,7 +6,7 @@
 #include "MyVulkanGraphicsPipeline.h"
 
 void MyVulkanDraw::createFrameBuffers(MyVulkanImageView myVulkanImageView, MyVulkanRenderPass myVulkanRenderPass,
-                                      MyVulkanSwapChain myVulkanSwapChain, VkDevice device) {
+                                      MyVulkanSwapChain myVulkanSwapChain, VkDevice *device) {
     swapChainFramebuffers.resize(myVulkanImageView.getSwapChainImageViews().size());
     //遍历视图创建帧缓冲区
     for (size_t i = 0; i < myVulkanImageView.getSwapChainImageViews().size(); i++) {
@@ -23,13 +23,13 @@ void MyVulkanDraw::createFrameBuffers(MyVulkanImageView myVulkanImageView, MyVul
         framebufferInfo.height = myVulkanSwapChain.getSwapChainExtent().height;
         framebufferInfo.layers = 1;
 
-        if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS) {
+        if (vkCreateFramebuffer(*device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create framebuffer!");
         }
     }
 }
 
-void MyVulkanDraw::createCommandPool(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, VkDevice device) {
+void MyVulkanDraw::createCommandPool(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, VkDevice *device) {
     QueueFamilyIndices queueFamilyIndices = MyVulkanPhysicalDevices::findQueueFamilies(physicalDevice, surface);
 
     VkCommandPoolCreateInfo poolInfo{};
@@ -37,20 +37,20 @@ void MyVulkanDraw::createCommandPool(VkPhysicalDevice physicalDevice, VkSurfaceK
     poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
-    if (vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
+    if (vkCreateCommandPool(*device, &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
         throw std::runtime_error("failed to create command pool!");
     }
 
 }
 
-void MyVulkanDraw::createCommandBuffer(VkDevice device) {
+void MyVulkanDraw::createCommandBuffer(VkDevice *device) {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.commandPool = commandPool;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = 1;
 
-    if (vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer) != VK_SUCCESS) {
+    if (vkAllocateCommandBuffers(*device, &allocInfo, &commandBuffer) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate command buffers!");
     }
 }

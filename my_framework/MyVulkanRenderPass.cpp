@@ -4,7 +4,7 @@
 
 #include "MyVulkanRenderPass.h"
 
-void MyVulkanRenderPass::createRenderPass(MyVulkanSwapChain myVulkanSwapChain, VkDevice device) {
+void MyVulkanRenderPass::createRenderPass(MyVulkanSwapChain myVulkanSwapChain, VkDevice *device) {
     //案例中 只有一个颜色缓冲区附件，由交换链中的一个图像
     VkAttachmentDescription colorAttachment{};
     colorAttachment.format = myVulkanSwapChain.getSwapChainImageFormat();
@@ -51,7 +51,7 @@ void MyVulkanRenderPass::createRenderPass(MyVulkanSwapChain myVulkanSwapChain, V
     renderPassInfo.dependencyCount = 1;
     renderPassInfo.pDependencies = &dependency;
 
-    if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
+    if (vkCreateRenderPass(*device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
         throw std::runtime_error("failed to create render pass!");
     }
 }

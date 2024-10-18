@@ -5,7 +5,7 @@
 #include "MyVulkanImageView.h"
 
 void
-MyVulkanImageView::createImageViews(MyVulkanSwapChain myVulkanSwapChain, VkDevice device) {
+MyVulkanImageView::createImageViews(MyVulkanSwapChain myVulkanSwapChain, VkDevice *device) {
     //调整列表的大小以适合我们将创建的所有图像视图
     swapChainImageViews.resize(myVulkanSwapChain.getSwapChainImages().size());
     //设置迭代所有交换链映像的循环
@@ -33,7 +33,7 @@ MyVulkanImageView::createImageViews(MyVulkanSwapChain myVulkanSwapChain, VkDevic
         createInfo.subresourceRange.layerCount = 1;
 
         //创建 image 视图
-        if (vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS) {
+        if (vkCreateImageView(*device, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create image views!");
         }
     }

@@ -18,13 +18,13 @@ public:
 
     //创建帧缓冲区
     void createFrameBuffers(MyVulkanImageView myVulkanImageView, MyVulkanRenderPass myVulkanRenderPass,
-                            MyVulkanSwapChain myVulkanSwapChain, VkDevice device);
+                            MyVulkanSwapChain myVulkanSwapChain, VkDevice *device);
 
     //创建命令池
-    void createCommandPool(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, VkDevice device);
+    void createCommandPool(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, VkDevice *device);
 
     //创建命令缓冲区
-    void createCommandBuffer(VkDevice device);
+    void createCommandBuffer(VkDevice *device);
 
     //命令缓冲区录制 处理将要执行的命令写入命令缓冲区的
     void recordCommandBuffer(uint32_t imageIndex, VkRenderPass renderPass, VkExtent2D swapChainExtent,

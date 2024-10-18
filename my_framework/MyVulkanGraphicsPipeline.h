@@ -18,7 +18,7 @@ public:
     ~MyVulkanGraphicsPipeline() = default;
 
     //创建一个图形管线
-    void createGraphicsPipeline(MyVulkanShaderCompile myVulkanShaderCompile, VkDevice device,
+    void createGraphicsPipeline(MyVulkanShaderCompile myVulkanShaderCompile, VkDevice *device,
                                 MyVulkanSwapChain &myVulkanSwapChain, MyVulkanFixedFuncs myVulkanFixedFuncs,
                                 VkRenderPass renderPass, VkPipeline pT);
 

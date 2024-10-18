@@ -15,6 +15,6 @@ public:
     ~MyVulkanSurface() = default;
 
     //创建窗口表面
-    static void createSurface(VkInstance instance, GLFWwindow *glfWwindow, VkSurfaceKHR *vkSurfaceKhr);
+    static void createSurface(VkInstance *instance, GLFWwindow *glfWwindow, VkSurfaceKHR *vkSurfaceKhr);
 };
 

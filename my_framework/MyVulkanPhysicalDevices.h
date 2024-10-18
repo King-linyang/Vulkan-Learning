@@ -29,7 +29,7 @@ public:
     ~MyVulkanPhysicalDevices() = default;
 
     //选择物理设备 显卡等
-    static void pickPhysicalDevice(VkInstance instance, VkPhysicalDevice *physicalDevice, VkSurfaceKHR surface);
+    static void pickPhysicalDevice(VkInstance *instance, VkPhysicalDevice *physicalDevice, VkSurfaceKHR surface);
 
     //寻找一个支持 graphics 命令的队列
     static QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface);

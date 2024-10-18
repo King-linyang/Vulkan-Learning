@@ -41,11 +41,11 @@ public:
             void *pUserData);
 
     // 设置调试信息
-    static void setupDebugMessenger(VkInstance instance, VkDebugUtilsMessengerEXT *debugMessenger);
+    static void setupDebugMessenger(VkInstance *instance, VkDebugUtilsMessengerEXT *debugMessenger);
 
     static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
 
-    static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
+    static void DestroyDebugUtilsMessengerEXT(VkInstance *instance, VkDebugUtilsMessengerEXT debugMessenger,
                                               const VkAllocationCallbacks *pAllocator);
 
 private:

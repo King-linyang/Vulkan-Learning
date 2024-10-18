@@ -6,8 +6,8 @@
 #include "MyVulkanSurface.h"
 
 
-void MyVulkanSurface::createSurface(VkInstance instance, GLFWwindow *glfWwindow, VkSurfaceKHR *vkSurfaceKhr) {
-    if (glfwCreateWindowSurface(instance, glfWwindow, nullptr, vkSurfaceKhr) != VK_SUCCESS) {
+void MyVulkanSurface::createSurface(VkInstance *instance, GLFWwindow *glfWwindow, VkSurfaceKHR *vkSurfaceKhr) {
+    if (glfwCreateWindowSurface(*instance, glfWwindow, nullptr, vkSurfaceKhr) != VK_SUCCESS) {
         throw std::runtime_error("failed to create window surface!");
     }
 }

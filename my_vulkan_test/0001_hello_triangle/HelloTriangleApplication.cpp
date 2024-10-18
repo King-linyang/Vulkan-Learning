@@ -14,11 +14,11 @@ void HelloTriangleApplication::initVulkan() {
     //创建实例
     createInstance();
     //验证层
-    MyValidationLayers::setupDebugMessenger(instance, &debugMessenger);
+    MyValidationLayers::setupDebugMessenger(&instance, &debugMessenger);
     //创建窗口表面
-    MyVulkanSurface::createSurface(instance, window, &surface);
+    MyVulkanSurface::createSurface(&instance, window, &surface);
     //选择物理设备
-    MyVulkanPhysicalDevices::pickPhysicalDevice(instance, &physicalDevice, surface);
+    MyVulkanPhysicalDevices::pickPhysicalDevice(&instance, &physicalDevice, surface);
     //创建逻辑设备
     MyVulkanLogicalDevices::createLogicalDevice(&physicalDevice, &device, &graphicsQueue, surface, presentQueue);
     //创建交换链
@@ -78,7 +78,7 @@ void HelloTriangleApplication::cleanup() {
     //销毁逻辑设备
     vkDestroyDevice(device, nullptr);
     if (enableValidationLayers) {
-        MyValidationLayers::DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
+        MyValidationLayers::DestroyDebugUtilsMessengerEXT(&instance, debugMessenger, nullptr);
     }
     //销毁窗口表面
     vkDestroySurfaceKHR(instance, surface, nullptr);

@@ -4,18 +4,18 @@
 
 #include "MyVulkanPhysicalDevices.h"
 
-void MyVulkanPhysicalDevices::pickPhysicalDevice(VkInstance instance, VkPhysicalDevice *physicalDevice,
+void MyVulkanPhysicalDevices::pickPhysicalDevice(VkInstance *instance, VkPhysicalDevice *physicalDevice,
                                                  VkSurfaceKHR surface) {
     // 获取显卡设备数量
     uint32_t deviceCount = 0;
-    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+    vkEnumeratePhysicalDevices(*instance, &deviceCount, nullptr);
     //如果有 0 台设备支持 Vulkan，那么就没有必要再进一步了。
     if (deviceCount == 0) {
         throw std::runtime_error("failed to find GPUs with Vulkan support!");
     }
     //分配一个数组来保存所有 VkPhysicalDevice 句柄
     std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+    vkEnumeratePhysicalDevices(*instance, &deviceCount, devices.data());
 
     //检查是否有任何物理设备满足我们将添加到该功能中的要求
     for (const auto &device: devices) {

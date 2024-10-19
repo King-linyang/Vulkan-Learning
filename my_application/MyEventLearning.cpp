@@ -8,7 +8,7 @@
 MyEventLearning *MyEventLearning::myEventLearningTmp = nullptr;
 
 void MyEventLearning::mouseCallback(GLFWwindow *window, int button, int action, int mods) {
-    std::cout << "OnMouse-" << button << "--" << action << "--" << mods << std::endl;
+//    std::cout << "OnMouse-" << button << "--" << action << "--" << mods << std::endl;
 }
 
 MyEventLearning *MyEventLearning::getInstance() {

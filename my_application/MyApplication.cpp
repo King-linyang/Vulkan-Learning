@@ -23,7 +23,7 @@ void MyApplication::initVulkan() {
     //验证层
     MyValidationLayers::setupDebugMessenger(&instance, &debugMessenger);
     //创建窗口表面
-    MyVulkanSurface::createSurface(&instance, window, &surface);
+    createSurface();
     //选择物理设备
     MyVulkanDevices::pickPhysicalDevice(&instance, &physicalDevice, &surface);
     //创建逻辑设备
@@ -138,4 +138,10 @@ void MyApplication::run() {
     initVulkan();
     mainLoop();
     cleanup();
+}
+
+void MyApplication::createSurface() {
+    if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create window surface!");
+    }
 }

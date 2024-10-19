@@ -7,7 +7,6 @@
 #include "../my_framework/MyVulkanDevices.h"
 #include "../../my_framework/MyVulkanGraphicsPipeline.h"
 #include "../../my_framework/MyValidationLayers.h"
-#include "../../my_framework/MyVulkanSurface.h"
 #include "../../my_framework/MyVulkanShaderCompile.h"
 #include "../../my_framework/MyVulkanFixedFuncs.h"
 #include "../../my_framework/MyVulkanRenderPass.h"
@@ -30,6 +29,9 @@ public:
 
     // 实例化方法
     void run();
+
+    //创建窗口表面
+    void createSurface();
 
 private:
     // 交换链

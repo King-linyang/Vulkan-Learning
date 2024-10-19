@@ -17,7 +17,7 @@ void MyApplication::initWindow() {
     glfwSetFramebufferSizeCallback(window, myEventLearning->framebufferResizeCallback);
 }
 
-void MyApplication::initVulkan() {
+void MyApplication::initVulkan(const char *path) {
     //创建实例
     createInstance();
     //验证层
@@ -37,7 +37,7 @@ void MyApplication::initVulkan() {
     //创建渲染过程
     createRenderPass();
     //创建图形管线
-    createGraphicsPipeline();
+    createGraphicsPipeline(path);
 
     //创建帧缓冲
     createFrameBuffers();
@@ -133,9 +133,9 @@ void MyApplication::createInstance() {
     }
 }
 
-void MyApplication::run() {
+void MyApplication::run(const char *path) {
     initWindow();
-    initVulkan();
+    initVulkan(path);
     mainLoop();
     cleanup();
 }
@@ -198,11 +198,10 @@ void MyApplication::createRenderPass() {
     }
 }
 
-void MyApplication::createGraphicsPipeline() {
+void MyApplication::createGraphicsPipeline(const char *path) {
     //创建shader编译器
     MyVulkanShaderCompile myVulkanShaderCompile = MyVulkanShaderCompile();
-    myVulkanShaderCompile.setShaderPath(
-            "E:\\A_learning_data\\vulkan_learning001\\vulkan_learing\\cmake-build-debug\\assets\\0001_shader\\");
+    myVulkanShaderCompile.setShaderPath(path);
     myVulkanShaderCompile.setVertShaderName("vertex.vert");
     myVulkanShaderCompile.setFragShaderName("fragment.frag");
     myVulkanShaderCompile.compileShader();

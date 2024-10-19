@@ -69,8 +69,8 @@ public:
     //创建逻辑设备
     void createLogicalDevice();
 
-    // 实例化方法
-    void run();
+    // 实例化方法，传入shader文件路径
+    void run(const char *path);
 
     //创建窗口表面
     void createSurface();
@@ -79,7 +79,7 @@ public:
     void createRenderPass();
 
     //创建一个图形管线
-    void createGraphicsPipeline();
+    void createGraphicsPipeline(const char *path);
 
     //创建着色器模块 采用一个以字节码为参数的缓冲区，并从中创建一个 VkShaderModule
     VkShaderModule createShaderModule(const std::vector<char> &code);
@@ -192,7 +192,7 @@ private:
     void initWindow();
 
     // 初始化Vulkan
-    void initVulkan();
+    void initVulkan(const char *string);
 
     // 主循环
     void mainLoop();

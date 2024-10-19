@@ -132,6 +132,14 @@ public:
     //找到合适的内存类型
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
+    //创建缓冲区
+    void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
+                      VkMemoryPropertyFlags properties, VkBuffer &buffer,
+                      VkDeviceMemory &bufferMemory);
+
+    //复制缓冲区
+    void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+
 public:
     //窗口发生调整
     bool framebufferResized = false;

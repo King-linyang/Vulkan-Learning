@@ -31,12 +31,32 @@ public:
                              VkPipeline graphicsPipeline);
 
     //绘制
-    void drawFrame(VkDevice *device, VkSwapchainKHR swapChain, VkRenderPass renderPass,
-                   MyVulkanSwapChain *myVulkanSwapChain, VkPipeline graphicsPipeline, VkQueue graphicsQueue,
-                   VkQueue presentQueue);
+    void drawFrame(VkDevice *device, VkSwapchainKHR *swapChain, MyVulkanSwapChain *myVulkanSwapChain,
+                   VkPipeline graphicsPipeline, VkQueue graphicsQueue, VkQueue presentQueue,
+                   VkPhysicalDevice *physicalDevice, VkSurfaceKHR *surface,
+                   GLFWwindow *window, MyVulkanRenderPass myVulkanRenderPass);
 
     //为每一帧创建同步对象
     void createSyncObjects(VkDevice *device);
+
+    //创建图像视图
+    void createImageViews(VkDevice *device, MyVulkanSwapChain *myVulkanSwapChain);
+
+    //销毁图像视图
+    void cleanUpImageView(VkDevice *device) {
+        //清理图像视图
+        for (auto imageView: swapChainImageViews) {
+            vkDestroyImageView(*device, imageView, nullptr);
+        }
+    }
+
+    //重建交换链--适配窗口大小变化
+    void recreateSwapChain(VkPhysicalDevice *physicalDevice, VkSurfaceKHR *surface,
+                           GLFWwindow *window, VkSwapchainKHR *swapChain, VkDevice *device,
+                           MyVulkanSwapChain *myVulkanSwapChain, MyVulkanRenderPass myVulkanRenderPass);
+
+    //清理
+    void cleanupSwapChain(VkDevice device, VkSwapchainKHR *swapChain);
 
     //获取帧缓冲区
     std::vector<VkFramebuffer> getSwapChainFramebuffers() {
@@ -59,6 +79,9 @@ public:
     }
 
 private:
+    //存储图像视图
+    std::vector<VkImageView> swapChainImageViews;
+
     //帧缓冲区
     std::vector<VkFramebuffer> swapChainFramebuffers;
     //命令池

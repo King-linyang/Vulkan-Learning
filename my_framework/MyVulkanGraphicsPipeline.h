@@ -26,8 +26,13 @@ public:
     VkShaderModule createShaderModule(const std::vector<char> &code, VkDevice device);
 
     //销毁管道
-    void cleanUp(VkDevice *device) {
+    void cleanUpPipelineLayout(VkDevice *device) {
         vkDestroyPipelineLayout(*device, pipelineLayout, nullptr);
+    }
+
+    //销毁图形管线
+    void cleanUpGraphicsPipeline(VkDevice *device) {
+        vkDestroyPipeline(*device, graphicsPipeline, nullptr);
     }
 
     //获取图形管线

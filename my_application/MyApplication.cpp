@@ -25,8 +25,10 @@ void MyApplication::initVulkan() {
     MyVulkanDevices::createLogicalDevice(&physicalDevice, &device, &graphicsQueue, &surface, &presentQueue);
     //创建交换链
     myVulkanSwapChain.createSwapChain(&physicalDevice, &surface, window, &swapChain, &device);
+
     //创建图像视图
-    myVulkanSwapChain.createImageViews(&device);
+    myVulkanDraw.createImageViews(&device, &myVulkanSwapChain);
+
     //创建渲染过程
     myVulkanRenderPass.createRenderPass(myVulkanSwapChain, &device);
     //创建shader编译器
@@ -55,27 +57,27 @@ void MyApplication::mainLoop() {
         //glfw事件
         glfwPollEvents();
         //渲染
-        myVulkanDraw.drawFrame(&device, swapChain, myVulkanRenderPass.getRenderPass(),
-                               &myVulkanSwapChain, myVulkanGraphicsPipeline.getGraphicsPipeline(),
-                               graphicsQueue, presentQueue);
+        myVulkanDraw.drawFrame(&device, &swapChain, &myVulkanSwapChain, myVulkanGraphicsPipeline.getGraphicsPipeline(),
+                               graphicsQueue, presentQueue, &physicalDevice, &surface, window, myVulkanRenderPass);
     }
 }
 
 void MyApplication::cleanup() {
+    //清理swapChain
+    myVulkanDraw.cleanupSwapChain(device, &swapChain);
+
+    myVulkanGraphicsPipeline.cleanUpGraphicsPipeline(&device);
+    myVulkanGraphicsPipeline.cleanUpPipelineLayout(&device);
+
     //清理同步对象
     myVulkanDraw.cleanUpSyncObjects(&device);
+
     //清理命令池
     myVulkanDraw.cleanUpCommandPool(&device);
-    //清理帧缓冲
-    myVulkanRenderPass.cleanUp(myVulkanDraw.getSwapChainFramebuffers(), &device);
-    //清理图形管线
-    myVulkanGraphicsPipeline.cleanUp(&device);
-    //清理渲染过程
-    myVulkanRenderPass.cleanUp(&device);
-    //清理图像视图
-    myVulkanSwapChain.cleanUpImageView(&device);
-    //清理交换链
-    vkDestroySwapchainKHR(device, swapChain, nullptr);
+
+    //清理逻辑设备
+    vkDestroyDevice(device, nullptr);
+
     //销毁逻辑设备
     vkDestroyDevice(device, nullptr);
     if (enableValidationLayers) {

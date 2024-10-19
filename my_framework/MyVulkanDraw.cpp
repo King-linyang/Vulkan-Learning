@@ -7,11 +7,11 @@
 
 void MyVulkanDraw::createFrameBuffers(MyVulkanRenderPass myVulkanRenderPass, MyVulkanSwapChain myVulkanSwapChain,
                                       VkDevice *device) {
-    swapChainFramebuffers.resize(myVulkanSwapChain.getSwapChainImageViews().size());
+    swapChainFramebuffers.resize(swapChainImageViews.size());
     //遍历视图创建帧缓冲区
-    for (size_t i = 0; i < myVulkanSwapChain.getSwapChainImageViews().size(); i++) {
+    for (size_t i = 0; i < swapChainImageViews.size(); i++) {
         VkImageView attachments[] = {
-                myVulkanSwapChain.getSwapChainImageViews()[i]
+                swapChainImageViews[i]
         };
 
         VkFramebufferCreateInfo framebufferInfo{};
@@ -109,9 +109,10 @@ void MyVulkanDraw::recordCommandBuffer(uint32_t imageIndex, VkRenderPass renderP
 }
 
 void
-MyVulkanDraw::drawFrame(VkDevice *device, VkSwapchainKHR swapChain, VkRenderPass renderPass,
-                        MyVulkanSwapChain *myVulkanSwapChain, VkPipeline graphicsPipeline, VkQueue graphicsQueue,
-                        VkQueue presentQueue) {
+MyVulkanDraw::drawFrame(VkDevice *device, VkSwapchainKHR *swapChain, MyVulkanSwapChain *myVulkanSwapChain,
+                        VkPipeline graphicsPipeline, VkQueue graphicsQueue, VkQueue presentQueue,
+                        VkPhysicalDevice *physicalDevice, VkSurfaceKHR *surface,
+                        GLFWwindow *window, MyVulkanRenderPass myVulkanRenderPass) {
     //等待上一帧
     vkWaitForFences(*device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
     //调用手动将 fence 重置为 unsignaled 状态
@@ -119,12 +120,20 @@ MyVulkanDraw::drawFrame(VkDevice *device, VkSwapchainKHR swapChain, VkRenderPass
 
     //获取下一个图像
     uint32_t imageIndex;
-    vkAcquireNextImageKHR(*device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame],
-                          VK_NULL_HANDLE, &imageIndex);
+    VkResult result = vkAcquireNextImageKHR(*device, *swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame],
+                                            VK_NULL_HANDLE, &imageIndex);
+    //如果窗口大小改变，重新创建swapchain
+    if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+        recreateSwapChain(physicalDevice, surface, window, swapChain, device, myVulkanSwapChain, myVulkanRenderPass);
+        return;
+    } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+        throw std::runtime_error("failed to acquire swap chain image!");
+    }
 
     //录制命令缓冲区
     vkResetCommandBuffer(commandBuffers[currentFrame], 0);
-    recordCommandBuffer(imageIndex, renderPass, myVulkanSwapChain->getSwapChainExtent(), graphicsPipeline);
+    recordCommandBuffer(imageIndex, myVulkanRenderPass.getRenderPass(), myVulkanSwapChain->getSwapChainExtent(),
+                        graphicsPipeline);
     //提交命令缓冲区
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -153,7 +162,7 @@ MyVulkanDraw::drawFrame(VkDevice *device, VkSwapchainKHR swapChain, VkRenderPass
     presentInfo.waitSemaphoreCount = 1;
     presentInfo.pWaitSemaphores = signalSemaphores;
 
-    VkSwapchainKHR swapChains[] = {swapChain};
+    VkSwapchainKHR swapChains[] = {*swapChain};
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;
@@ -183,4 +192,62 @@ void MyVulkanDraw::createSyncObjects(VkDevice *device) {
             throw std::runtime_error("failed to create synchronization objects for a frame!");
         }
     }
+}
+
+void MyVulkanDraw::recreateSwapChain(VkPhysicalDevice *physicalDevice, VkSurfaceKHR *surface,
+                                     GLFWwindow *window, VkSwapchainKHR *swapChain, VkDevice *device,
+                                     MyVulkanSwapChain *myVulkanSwapChain, MyVulkanRenderPass myVulkanRenderPass) {
+    vkDeviceWaitIdle(*device);
+
+    cleanupSwapChain(*device, swapChain);
+
+    myVulkanSwapChain->createSwapChain(physicalDevice, surface, window, swapChain, device);
+    createImageViews(device, myVulkanSwapChain);
+    createFrameBuffers(myVulkanRenderPass, *myVulkanSwapChain, device);
+}
+
+void MyVulkanDraw::createImageViews(VkDevice *device, MyVulkanSwapChain *myVulkanSwapChain) {
+    //调整列表的大小以适合我们将创建的所有图像视图
+    swapChainImageViews.resize(myVulkanSwapChain->getSwapChainImages().size());
+    //设置迭代所有交换链映像的循环
+    for (size_t i = 0; i < myVulkanSwapChain->getSwapChainImages().size(); i++) {
+        //subresourceRange 字段描述图像的用途以及应访问图像的哪个部分。我们的图像将用作颜色目标，无需任何 mipmap 级别或多个图层。
+        VkImageViewCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        createInfo.image = myVulkanSwapChain->getSwapChainImages()[i];
+
+        //viewType 参数允许您将图像视为 1D 纹理、2D 纹理、3D 纹理和立方体贴图。
+        createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        createInfo.format = myVulkanSwapChain->getSwapChainImageFormat();
+
+        //components 字段允许您重排颜色通道。例如，可以将所有通道映射到单色纹理的红色通道。您还可以将 0 和 1 的常量值映射到通道
+        createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+        //subresourceRange 字段描述图像的用途以及应访问图像的哪个部分。我们的图像将用作颜色目标，无需任何 mipmap 级别或多个图层。
+        createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        createInfo.subresourceRange.baseMipLevel = 0;
+        createInfo.subresourceRange.levelCount = 1;
+        createInfo.subresourceRange.baseArrayLayer = 0;
+        createInfo.subresourceRange.layerCount = 1;
+
+        //创建 image 视图
+        if (vkCreateImageView(*device, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create image views!");
+        }
+    }
+}
+
+void MyVulkanDraw::cleanupSwapChain(VkDevice device, VkSwapchainKHR *swapChain) {
+    for (auto framebuffer: swapChainFramebuffers) {
+        vkDestroyFramebuffer(device, framebuffer, nullptr);
+    }
+
+    for (auto imageView: swapChainImageViews) {
+        vkDestroyImageView(device, imageView, nullptr);
+    }
+
+    vkDestroySwapchainKHR(device, *swapChain, nullptr);
 }

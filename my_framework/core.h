@@ -5,6 +5,7 @@
 #pragma once
 
 #define GLFW_INCLUDE_VULKAN
+
 #include <GLFW/glfw3.h>
 
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -15,7 +16,11 @@
 
 //glm需要开启这个宏
 #define GLM_ENABLE_EXPERIMENTAL
+
 #include <glm/gtx/string_cast.hpp>
 
 //vulkan
 #include <vulkan/vulkan.h>
+
+//内存管理
+#include "../my_application/my_memory_pool/MyMemoryPoolManager.h"

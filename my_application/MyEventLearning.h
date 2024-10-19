@@ -12,10 +12,9 @@
 
 class MyEventLearning {
 public:
-    ~MyEventLearning() {
-        //释放内存
-        POOL_DELETE(myEventLearningTmp);
-    };
+    MyEventLearning() = default;
+
+    ~MyEventLearning() = default;
 
     //用于访问实例的静态函数
     static MyEventLearning *getInstance();

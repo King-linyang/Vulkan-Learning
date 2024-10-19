@@ -4,7 +4,7 @@
 
 #include "MyEventLearning.h"
 
-//初始化Application的静态变量
+//初始化 MyEventLearning 的静态变量
 MyEventLearning *MyEventLearning::myEventLearningTmp = nullptr;
 
 void MyEventLearning::mouseCallback(GLFWwindow *window, int button, int action, int mods) {

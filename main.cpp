@@ -28,11 +28,15 @@ int main() {
     // 使用大内存池分配内存
     auto largeArray = static_cast<char *>(ALLOCATE_LARGE_MEMORY(100 * sizeof(char)));
     std::cout << "Large memory allocated." << std::endl;
+    auto *mediumPtr1 = static_cast<double *>(ALLOCATE_LARGE_MEMORY(sizeof(double)));
+    *mediumPtr1 = 3.14;
+    std::cout << "Medium memory value: " << *mediumPtr1 << std::endl;
 
     // 释放内存
     DEALLOCATE_SMALL_MEMORY(smallPtr);
     DEALLOCATE_MEDIUM_MEMORY(mediumPtr);
     DEALLOCATE_LARGE_MEMORY(largeArray);
+    DEALLOCATE_LARGE_MEMORY(mediumPtr1);
 
 //    glfwInit();
 //

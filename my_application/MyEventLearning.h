@@ -12,7 +12,6 @@
 
 class MyEventLearning {
 public:
-
     ~MyEventLearning() {
         //释放内存
         DEALLOCATE_MEDIUM_MEMORY(myEventLearningTmp);

@@ -25,21 +25,9 @@ const uint32_t HEIGHT = 600;
 
 class HelloTriangleApplication {
 public:
-    HelloTriangleApplication() {
-        myVulkanSwapChain = MyVulkanSwapChain();
-        myVulkanImageView = MyVulkanImageView();
-        myVulkanGraphicsPipeline = MyVulkanGraphicsPipeline();
-        myVulkanFixedFuncs = MyVulkanFixedFuncs();
-        myVulkanRenderPass = MyVulkanRenderPass();
-    }
+    HelloTriangleApplication() = default;
 
-    ~HelloTriangleApplication() {
-        myVulkanSwapChain.~MyVulkanSwapChain();
-        myVulkanImageView.~MyVulkanImageView();
-        myVulkanGraphicsPipeline.~MyVulkanGraphicsPipeline();
-        myVulkanFixedFuncs.~MyVulkanFixedFuncs();
-        myVulkanRenderPass.~MyVulkanRenderPass();
-    };
+    ~HelloTriangleApplication() = default;
 
     // 实例化方法
     void run();

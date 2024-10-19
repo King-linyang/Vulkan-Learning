@@ -1,6 +1,9 @@
 //
 // Created by wangly on 2024/10/19.
 // 内存池管理
+// 使用boost库进行内存池管理
+// https://www.boost.org/
+// getting start 中有boost的编译
 
 #pragma once
 

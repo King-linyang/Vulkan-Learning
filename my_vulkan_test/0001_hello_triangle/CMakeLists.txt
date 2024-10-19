@@ -7,11 +7,6 @@ project(0001_hello_triangle)
 #本工程支持的C++版本
 set(CMAKE_CXX_STANDARD 17)
 
-# 查找 Vulkan
-find_package(Vulkan REQUIRED)
-# 添加包含目录
-include_directories(${Vulkan_INCLUDE_DIRS})
-
 file(GLOB_RECURSE ALL_CPP_FILES "./*.cpp")
 
 #本工程所有cpp文件编译链接，生成exe

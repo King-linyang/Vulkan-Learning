@@ -2,12 +2,11 @@
 // Created by wangly on 2024/10/15.
 //
 
-#include "HelloTriangleApplication.h"
-
+#include "../../my_application/MyApplication.h"
 #include <iostream>
 
 int main() {
-    HelloTriangleApplication app;
+    MyApplication app;
 
     try {
         app.run();

@@ -6,7 +6,6 @@
 
 #include <vector>
 #include "core.h"
-#include "MyVulkanRenderPass.h"
 #include "MyVulkanGraphicsPipeline.h"
 #include "MyVulkanDevices.h"
 
@@ -17,7 +16,7 @@ public:
     ~MyVulkanDraw() = default;
 
     //创建帧缓冲区
-    void createFrameBuffers(MyVulkanRenderPass myVulkanRenderPass, MyVulkanSwapChain myVulkanSwapChain,
+    void createFrameBuffers(VkRenderPass renderPass, MyVulkanSwapChain myVulkanSwapChain,
                             VkDevice *device);
 
     //创建命令池
@@ -34,7 +33,7 @@ public:
     void drawFrame(VkDevice *device, VkSwapchainKHR *swapChain, MyVulkanSwapChain *myVulkanSwapChain,
                    VkPipeline graphicsPipeline, VkQueue graphicsQueue, VkQueue presentQueue,
                    VkPhysicalDevice *physicalDevice, VkSurfaceKHR *surface,
-                   GLFWwindow *window, MyVulkanRenderPass myVulkanRenderPass);
+                   GLFWwindow *window, VkRenderPass renderPass);
 
     //为每一帧创建同步对象
     void createSyncObjects(VkDevice *device);
@@ -53,7 +52,7 @@ public:
     //重建交换链--适配窗口大小变化
     void recreateSwapChain(VkPhysicalDevice *physicalDevice, VkSurfaceKHR *surface,
                            GLFWwindow *window, VkSwapchainKHR *swapChain, VkDevice *device,
-                           MyVulkanSwapChain *myVulkanSwapChain, MyVulkanRenderPass myVulkanRenderPass);
+                           MyVulkanSwapChain *myVulkanSwapChain, VkRenderPass renderPass);
 
     //清理
     void cleanupSwapChain(VkDevice device, VkSwapchainKHR *swapChain);

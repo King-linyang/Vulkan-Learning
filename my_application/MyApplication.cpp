@@ -35,7 +35,7 @@ void MyApplication::initVulkan() {
     myVulkanDraw.createImageViews(&device, &myVulkanSwapChain);
 
     //创建渲染过程
-    myVulkanRenderPass.createRenderPass(myVulkanSwapChain, &device);
+    createRenderPass();
     //创建shader编译器
     MyVulkanShaderCompile myVulkanShaderCompile = MyVulkanShaderCompile();
     myVulkanShaderCompile.setShaderPath(
@@ -45,9 +45,9 @@ void MyApplication::initVulkan() {
     myVulkanShaderCompile.compileShader();
     //创建图形管线
     myVulkanGraphicsPipeline.createGraphicsPipeline(myVulkanShaderCompile, &device, myVulkanSwapChain,
-                                                    myVulkanFixedFuncs, myVulkanRenderPass.getRenderPass());
+                                                    myVulkanFixedFuncs, renderPass);
     //创建帧缓冲
-    myVulkanDraw.createFrameBuffers(myVulkanRenderPass, myVulkanSwapChain, &device);
+    myVulkanDraw.createFrameBuffers(renderPass, myVulkanSwapChain, &device);
     //创建命令池
     myVulkanDraw.createCommandPool(&physicalDevice, &surface, &device);
     //创建命令缓冲
@@ -63,7 +63,7 @@ void MyApplication::mainLoop() {
         glfwPollEvents();
         //渲染
         myVulkanDraw.drawFrame(&device, &swapChain, &myVulkanSwapChain, myVulkanGraphicsPipeline.getGraphicsPipeline(),
-                               graphicsQueue, presentQueue, &physicalDevice, &surface, window, myVulkanRenderPass);
+                               graphicsQueue, presentQueue, &physicalDevice, &surface, window, renderPass);
     }
 }
 
@@ -75,7 +75,7 @@ void MyApplication::cleanup() {
     myVulkanGraphicsPipeline.cleanUpPipelineLayout(&device);
 
     //渲染通道
-    myVulkanRenderPass.cleanUp(&device);
+    cleanUpRenderPass();
     //清理同步对象
     myVulkanDraw.cleanUpSyncObjects(&device);
 
@@ -143,5 +143,57 @@ void MyApplication::run() {
 void MyApplication::createSurface() {
     if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
         throw std::runtime_error("failed to create window surface!");
+    }
+}
+
+void MyApplication::createRenderPass() {
+    //案例中 只有一个颜色缓冲区附件，由交换链中的一个图像
+    VkAttachmentDescription colorAttachment{};
+    colorAttachment.format = myVulkanSwapChain.getSwapChainImageFormat();
+    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+
+    //使用一个样本
+    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+    //VK_ATTACHMENT_STORE_OP_DONT_CARE 渲染操作后，帧缓冲区的内容将未定义
+    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    //子通道
+    VkAttachmentReference colorAttachmentRef{};
+    colorAttachmentRef.attachment = 0;
+    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription subpass{};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+
+    subpass.colorAttachmentCount = 1;
+    subpass.pColorAttachments = &colorAttachmentRef;
+
+    //子通道依赖
+    VkSubpassDependency dependency{};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.srcAccessMask = 0;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+    //渲染通道
+    VkRenderPassCreateInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    renderPassInfo.attachmentCount = 1;
+    renderPassInfo.pAttachments = &colorAttachment;
+    renderPassInfo.subpassCount = 1;
+    renderPassInfo.pSubpasses = &subpass;
+    renderPassInfo.dependencyCount = 1;
+    renderPassInfo.pDependencies = &dependency;
+
+    if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create render pass!");
     }
 }

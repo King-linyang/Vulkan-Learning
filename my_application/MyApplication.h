@@ -9,7 +9,6 @@
 #include "../../my_framework/MyValidationLayers.h"
 #include "../../my_framework/MyVulkanShaderCompile.h"
 #include "../../my_framework/MyVulkanFixedFuncs.h"
-#include "../../my_framework/MyVulkanRenderPass.h"
 #include "../../my_framework/MyVulkanDraw.h"
 #include "MyEventLearning.h"
 
@@ -33,6 +32,14 @@ public:
     //创建窗口表面
     void createSurface();
 
+    //创建渲染过程
+    void createRenderPass();
+
+    //清理工作
+    void cleanUpRenderPass() {
+        vkDestroyRenderPass(device, renderPass, nullptr);
+    }
+
 private:
     // 交换链
     MyVulkanSwapChain myVulkanSwapChain;
@@ -40,8 +47,6 @@ private:
     MyVulkanGraphicsPipeline myVulkanGraphicsPipeline;
     //固定功能
     MyVulkanFixedFuncs myVulkanFixedFuncs;
-    //渲染过程
-    MyVulkanRenderPass myVulkanRenderPass;
     //绘图
     MyVulkanDraw myVulkanDraw;
 
@@ -63,6 +68,8 @@ private:
     VkQueue presentQueue{};
     //交换链
     VkSwapchainKHR swapChain;
+    //渲染通道
+    VkRenderPass renderPass;
 private:
     // 初始化窗口
     void initWindow();

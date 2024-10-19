@@ -5,7 +5,7 @@
 #include "MyVulkanDraw.h"
 #include "MyVulkanGraphicsPipeline.h"
 
-void MyVulkanDraw::createFrameBuffers(MyVulkanRenderPass myVulkanRenderPass, MyVulkanSwapChain myVulkanSwapChain,
+void MyVulkanDraw::createFrameBuffers(VkRenderPass renderPass, MyVulkanSwapChain myVulkanSwapChain,
                                       VkDevice *device) {
     swapChainFramebuffers.resize(swapChainImageViews.size());
     //遍历视图创建帧缓冲区
@@ -16,7 +16,7 @@ void MyVulkanDraw::createFrameBuffers(MyVulkanRenderPass myVulkanRenderPass, MyV
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = myVulkanRenderPass.getRenderPass();
+        framebufferInfo.renderPass = renderPass;
         framebufferInfo.attachmentCount = 1;
         framebufferInfo.pAttachments = attachments;
         framebufferInfo.width = myVulkanSwapChain.getSwapChainExtent().width;
@@ -112,7 +112,7 @@ void
 MyVulkanDraw::drawFrame(VkDevice *device, VkSwapchainKHR *swapChain, MyVulkanSwapChain *myVulkanSwapChain,
                         VkPipeline graphicsPipeline, VkQueue graphicsQueue, VkQueue presentQueue,
                         VkPhysicalDevice *physicalDevice, VkSurfaceKHR *surface,
-                        GLFWwindow *window, MyVulkanRenderPass myVulkanRenderPass) {
+                        GLFWwindow *window, VkRenderPass renderPass) {
     //等待上一帧
     vkWaitForFences(*device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -122,7 +122,7 @@ MyVulkanDraw::drawFrame(VkDevice *device, VkSwapchainKHR *swapChain, MyVulkanSwa
                                             VK_NULL_HANDLE, &imageIndex);
     //如果窗口大小改变，重新创建swapchain
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-        recreateSwapChain(physicalDevice, surface, window, swapChain, device, myVulkanSwapChain, myVulkanRenderPass);
+        recreateSwapChain(physicalDevice, surface, window, swapChain, device, myVulkanSwapChain, renderPass);
         return;
     } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
         throw std::runtime_error("failed to acquire swap chain image!");
@@ -133,7 +133,7 @@ MyVulkanDraw::drawFrame(VkDevice *device, VkSwapchainKHR *swapChain, MyVulkanSwa
 
     //录制命令缓冲区
     vkResetCommandBuffer(commandBuffers[currentFrame], 0);
-    recordCommandBuffer(imageIndex, myVulkanRenderPass.getRenderPass(), myVulkanSwapChain->getSwapChainExtent(),
+    recordCommandBuffer(imageIndex, renderPass, myVulkanSwapChain->getSwapChainExtent(),
                         graphicsPipeline);
     //提交命令缓冲区
     VkSubmitInfo submitInfo{};
@@ -172,7 +172,7 @@ MyVulkanDraw::drawFrame(VkDevice *device, VkSwapchainKHR *swapChain, MyVulkanSwa
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
         framebufferResized = false;
-        recreateSwapChain(physicalDevice, surface, window, swapChain, device, myVulkanSwapChain, myVulkanRenderPass);
+        recreateSwapChain(physicalDevice, surface, window, swapChain, device, myVulkanSwapChain, renderPass);
     } else if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to present swap chain image!");
     }
@@ -205,14 +205,14 @@ void MyVulkanDraw::createSyncObjects(VkDevice *device) {
 
 void MyVulkanDraw::recreateSwapChain(VkPhysicalDevice *physicalDevice, VkSurfaceKHR *surface,
                                      GLFWwindow *window, VkSwapchainKHR *swapChain, VkDevice *device,
-                                     MyVulkanSwapChain *myVulkanSwapChain, MyVulkanRenderPass myVulkanRenderPass) {
+                                     MyVulkanSwapChain *myVulkanSwapChain, VkRenderPass renderPass) {
     vkDeviceWaitIdle(*device);
 
     cleanupSwapChain(*device, swapChain);
 
     myVulkanSwapChain->createSwapChain(physicalDevice, surface, window, swapChain, device);
     createImageViews(device, myVulkanSwapChain);
-    createFrameBuffers(myVulkanRenderPass, *myVulkanSwapChain, device);
+    createFrameBuffers(renderPass, *myVulkanSwapChain, device);
 }
 
 void MyVulkanDraw::createImageViews(VkDevice *device, MyVulkanSwapChain *myVulkanSwapChain) {

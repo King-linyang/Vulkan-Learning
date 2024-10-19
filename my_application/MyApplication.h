@@ -13,6 +13,7 @@
 #include "../../my_framework/MyVulkanFixedFuncs.h"
 #include "../../my_framework/MyVulkanRenderPass.h"
 #include "../../my_framework/MyVulkanDraw.h"
+#include "MyEventLearning.h"
 
 #include <iostream>
 #include <stdexcept>

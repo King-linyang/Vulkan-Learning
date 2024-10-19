@@ -18,8 +18,12 @@
 #define ALLOCATE_MEDIUM_MEMORY(size) MyMemoryPoolManager::getInstance().allocate(MemoryType::MEDIUM, size)
 //申请大内存
 #define ALLOCATE_LARGE_MEMORY(size) MyMemoryPoolManager::getInstance().allocate(MemoryType::LARGE, size)
-//释放内存
-#define DEALLOCATE_MEMORY(type, ptr) MyMemoryPoolManager::getInstance().deallocate(type, ptr)
+//释放小内存
+#define DEALLOCATE_SMALL_MEMORY(ptr) MyMemoryPoolManager::getInstance().deallocate(MemoryType::SMALL, ptr)
+//释放中内存
+#define DEALLOCATE_MEDIUM_MEMORY(ptr) MyMemoryPoolManager::getInstance().deallocate(MemoryType::MEDIUM, ptr)
+//释放大内存
+#define DEALLOCATE_LARGE_MEMORY(ptr) MyMemoryPoolManager::getInstance().deallocate(MemoryType::LARGE, ptr)
 
 // 定义不同类型内存的标识
 enum class MemoryType {

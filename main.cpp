@@ -30,9 +30,9 @@ int main() {
     std::cout << "Large memory allocated." << std::endl;
 
     // 释放内存
-    DEALLOCATE_MEMORY(MemoryType::SMALL, smallPtr);
-    DEALLOCATE_MEMORY(MemoryType::MEDIUM, mediumPtr);
-    DEALLOCATE_MEMORY(MemoryType::LARGE, largeArray);
+    DEALLOCATE_SMALL_MEMORY(smallPtr);
+    DEALLOCATE_MEDIUM_MEMORY(mediumPtr);
+    DEALLOCATE_LARGE_MEMORY(largeArray);
 
 //    glfwInit();
 //

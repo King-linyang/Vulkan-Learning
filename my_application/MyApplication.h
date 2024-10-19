@@ -5,7 +5,6 @@
 
 #include "../../my_framework/core.h"
 #include "../my_framework/MyVulkanDevices.h"
-#include "../../my_framework/MyVulkanGraphicsPipeline.h"
 #include "../../my_framework/MyValidationLayers.h"
 #include "../../my_framework/MyVulkanShaderCompile.h"
 #include "../../my_framework/MyVulkanFixedFuncs.h"
@@ -40,11 +39,25 @@ public:
         vkDestroyRenderPass(device, renderPass, nullptr);
     }
 
+    //创建一个图形管线
+    void createGraphicsPipeline();
+
+    //创建着色器模块 采用一个以字节码为参数的缓冲区，并从中创建一个 VkShaderModule
+    VkShaderModule createShaderModule(const std::vector<char> &code);
+
+    //销毁图形管线
+    void cleanUpGraphicsPipeline() {
+        vkDestroyPipeline(device, graphicsPipeline, nullptr);
+    }
+
+    //销毁管道
+    void cleanUpPipelineLayout() {
+        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+    }
+
 private:
     // 交换链
     MyVulkanSwapChain myVulkanSwapChain;
-    //图形渲染管线
-    MyVulkanGraphicsPipeline myVulkanGraphicsPipeline;
     //固定功能
     MyVulkanFixedFuncs myVulkanFixedFuncs;
     //绘图
@@ -70,6 +83,11 @@ private:
     VkSwapchainKHR swapChain;
     //渲染通道
     VkRenderPass renderPass;
+
+    //管线布局
+    VkPipelineLayout pipelineLayout;
+    //图形管线
+    VkPipeline graphicsPipeline;
 private:
     // 初始化窗口
     void initWindow();

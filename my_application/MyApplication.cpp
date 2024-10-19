@@ -36,16 +36,9 @@ void MyApplication::initVulkan() {
 
     //创建渲染过程
     createRenderPass();
-    //创建shader编译器
-    MyVulkanShaderCompile myVulkanShaderCompile = MyVulkanShaderCompile();
-    myVulkanShaderCompile.setShaderPath(
-            "E:\\A_learning_data\\vulkan_learning001\\vulkan_learing\\cmake-build-debug\\assets\\0001_shader\\");
-    myVulkanShaderCompile.setVertShaderName("vertex.vert");
-    myVulkanShaderCompile.setFragShaderName("fragment.frag");
-    myVulkanShaderCompile.compileShader();
     //创建图形管线
-    myVulkanGraphicsPipeline.createGraphicsPipeline(myVulkanShaderCompile, &device, myVulkanSwapChain,
-                                                    myVulkanFixedFuncs, renderPass);
+    createGraphicsPipeline();
+
     //创建帧缓冲
     myVulkanDraw.createFrameBuffers(renderPass, myVulkanSwapChain, &device);
     //创建命令池
@@ -62,7 +55,7 @@ void MyApplication::mainLoop() {
         //glfw事件
         glfwPollEvents();
         //渲染
-        myVulkanDraw.drawFrame(&device, &swapChain, &myVulkanSwapChain, myVulkanGraphicsPipeline.getGraphicsPipeline(),
+        myVulkanDraw.drawFrame(&device, &swapChain, &myVulkanSwapChain, graphicsPipeline,
                                graphicsQueue, presentQueue, &physicalDevice, &surface, window, renderPass);
     }
 }
@@ -71,8 +64,10 @@ void MyApplication::cleanup() {
     //清理swapChain
     myVulkanDraw.cleanupSwapChain(device, &swapChain);
 
-    myVulkanGraphicsPipeline.cleanUpGraphicsPipeline(&device);
-    myVulkanGraphicsPipeline.cleanUpPipelineLayout(&device);
+    //销毁图形管线
+    cleanUpGraphicsPipeline();
+    //销毁管道
+    cleanUpPipelineLayout();
 
     //渲染通道
     cleanUpRenderPass();
@@ -196,4 +191,62 @@ void MyApplication::createRenderPass() {
     if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
         throw std::runtime_error("failed to create render pass!");
     }
+}
+
+void MyApplication::createGraphicsPipeline() {
+    //创建shader编译器
+    MyVulkanShaderCompile myVulkanShaderCompile = MyVulkanShaderCompile();
+    myVulkanShaderCompile.setShaderPath(
+            "E:\\A_learning_data\\vulkan_learning001\\vulkan_learing\\cmake-build-debug\\assets\\0001_shader\\");
+    myVulkanShaderCompile.setVertShaderName("vertex.vert");
+    myVulkanShaderCompile.setFragShaderName("fragment.frag");
+    myVulkanShaderCompile.compileShader();
+
+    // 加载着色器字节码
+    std::vector<char> vertShaderCode = myVulkanShaderCompile.loadShader("vertex.vert");
+    std::vector<char> fragShaderCode = myVulkanShaderCompile.loadShader("fragment.frag");
+
+    VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
+    VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+
+    //通过 VkPipelineShaderStageCreateInfo 结构将它们分配到特定的管道阶段。以使用着色器
+    //告诉 Vulkan 将在哪个管道阶段使用着色器
+    VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
+    vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+
+    vertShaderStageInfo.module = vertShaderModule;
+    //指定调用的函数
+    vertShaderStageInfo.pName = "main";
+
+    //创建片段着色器
+    VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
+    fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    fragShaderStageInfo.module = fragShaderModule;
+    fragShaderStageInfo.pName = "main";
+
+    //定义一个包含这两个结构的数组，使用它来在实际的管道创建步骤中引用它们
+    VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
+
+    //固定功能
+    myVulkanFixedFuncs.createTriangle(myVulkanSwapChain, device, pipelineLayout, shaderStages, renderPass,
+                                      &graphicsPipeline);
+
+    //管道创建完成，销毁着色器模块
+    vkDestroyShaderModule(device, fragShaderModule, nullptr);
+    vkDestroyShaderModule(device, vertShaderModule, nullptr);
+}
+
+VkShaderModule MyApplication::createShaderModule(const std::vector<char> &code) {
+    VkShaderModuleCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    createInfo.codeSize = code.size();
+    createInfo.pCode = reinterpret_cast<const uint32_t *>(code.data());
+    //创建 vkCreateShaderModule
+    VkShaderModule shaderModule;
+    if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create shader module!");
+    }
+    return shaderModule;
 }

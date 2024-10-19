@@ -6,7 +6,6 @@
 
 #include <vector>
 #include "core.h"
-#include "MyVulkanGraphicsPipeline.h"
 #include "MyVulkanDevices.h"
 
 class MyVulkanDraw {

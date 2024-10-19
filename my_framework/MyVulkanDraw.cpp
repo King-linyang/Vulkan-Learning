@@ -3,7 +3,6 @@
 // 绘图
 
 #include "MyVulkanDraw.h"
-#include "MyVulkanGraphicsPipeline.h"
 
 void MyVulkanDraw::createFrameBuffers(VkRenderPass renderPass, MyVulkanSwapChain myVulkanSwapChain,
                                       VkDevice *device) {

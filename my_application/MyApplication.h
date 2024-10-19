@@ -126,6 +126,12 @@ public:
     //清理
     void cleanupSwapChain();
 
+    //创建顶点缓冲区
+    void createVertexBuffer();
+
+    //找到合适的内存类型
+    uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
 public:
     //窗口发生调整
     bool framebufferResized = false;
@@ -187,6 +193,11 @@ private:
     std::vector<VkSemaphore> renderFinishedSemaphores;
     //每一帧飞行中的栅栏
     std::vector<VkFence> inFlightFences;
+
+    //顶点缓冲区
+    VkBuffer vertexBuffer;
+    //顶点缓冲区内存
+    VkDeviceMemory vertexBufferMemory;
 private:
     // 初始化窗口
     void initWindow();

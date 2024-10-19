@@ -43,6 +43,10 @@ void MyApplication::initVulkan(const char *path) {
     createFrameBuffers();
     //创建命令池
     createCommandPool();
+
+    //创建顶点缓冲区
+    createVertexBuffer();
+
     //创建命令缓冲
     createCommandBuffers();
     //创建同步对象
@@ -62,6 +66,10 @@ void MyApplication::mainLoop() {
 void MyApplication::cleanup() {
     //清理swapChain
     cleanupSwapChain();
+
+    //清理顶点缓冲区
+    vkDestroyBuffer(device, vertexBuffer, nullptr);
+    vkFreeMemory(device, vertexBufferMemory, nullptr);
 
     //销毁图形管线
     vkDestroyPipeline(device, graphicsPipeline, nullptr);
@@ -234,7 +242,7 @@ void MyApplication::createGraphicsPipeline(const char *path) {
     VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
     //固定功能
-    myVulkanFixedFuncs.createTriangle(swapChainExtent, device, pipelineLayout, shaderStages, renderPass,
+    myVulkanFixedFuncs.createTriangle1(swapChainExtent, device, pipelineLayout, shaderStages, renderPass,
                                       &graphicsPipeline);
 
     //管道创建完成，销毁着色器模块
@@ -458,7 +466,6 @@ void MyApplication::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
-
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
@@ -473,8 +480,13 @@ void MyApplication::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t 
     scissor.extent = swapChainExtent;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+    //绑定顶点缓冲区
+    VkBuffer vertexBuffers[] = {vertexBuffer};
+    VkDeviceSize offsets[] = {0};
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
     //发出draw命令
-    vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+    vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
     vkCmdEndRenderPass(commandBuffer);
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
         throw std::runtime_error("failed to record command buffer!");
@@ -770,4 +782,57 @@ bool MyApplication::isDeviceSuitable(VkPhysicalDevice _physicalDevice) {
         swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
     }
     return indices.isComplete() && extensionsSupported && swapChainAdequate;
+}
+
+void MyApplication::createVertexBuffer() {
+    //创建缓冲区索引
+    VkBufferCreateInfo bufferInfo{};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    //size ，它指定缓冲区的大小（以字节为单位）
+    bufferInfo.size = sizeof(vertices[0]) * vertices.size();
+    //usage ，它指示缓冲区中的数据将用于哪些目的。可以使用按位 or 指定多个用途。
+    bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    //缓冲区也可以由特定的队列系列拥有，也可以同时在多个队列系列之间共享。缓冲区将仅从图形队列中使用，因此我们可以坚持独占访问。
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    if (vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create vertex buffer!");
+    }
+
+    //分配要求
+    VkMemoryRequirements memRequirements;
+    vkGetBufferMemoryRequirements(device, vertexBuffer, &memRequirements);
+
+    //内存分配
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                                                               VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    if (vkAllocateMemory(device, &allocInfo, nullptr, &vertexBufferMemory) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate vertex buffer memory!");
+    }
+    //将分配的内存绑定到缓冲区
+    //第四个参数是内存区域内的偏移量
+    vkBindBufferMemory(device, vertexBuffer, vertexBufferMemory, 0);
+    void *data;
+    vkMapMemory(device, vertexBufferMemory, 0, bufferInfo.size, 0, &data);
+    memcpy(data, vertices.data(), (size_t) bufferInfo.size);
+    vkUnmapMemory(device, vertexBufferMemory);
+}
+
+uint32_t MyApplication::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+    //查询有关可用内存类型的信息
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+        //typeFilter 参数将用于指定合适的内存类型的位字段
+        if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+            return i;
+        }
+    }
+
+    //找不到给异常
+    throw std::runtime_error("failed to find suitable memory type!");
 }

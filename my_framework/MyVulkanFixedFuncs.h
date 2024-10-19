@@ -5,8 +5,10 @@
 #pragma once
 
 #include "core.h"
+#include "MyData.h"
 #include <vector>
 #include <stdexcept>
+#include <array>
 
 class MyVulkanFixedFuncs {
 public:
@@ -18,5 +20,10 @@ public:
     void createTriangle(VkExtent2D swapChainExtent, VkDevice device, VkPipelineLayout pipelineLayout,
                         VkPipelineShaderStageCreateInfo shaderStages[], VkRenderPass renderPass,
                         VkPipeline *graphicsPipeline);
+
+    //创建三角形，使用顶点缓冲区
+    void createTriangle1(VkExtent2D swapChainExtent, VkDevice device, VkPipelineLayout pipelineLayout,
+                         VkPipelineShaderStageCreateInfo shaderStages[], VkRenderPass renderPass,
+                         VkPipeline *graphicsPipeline);
 };
 

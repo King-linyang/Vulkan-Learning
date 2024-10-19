@@ -20,9 +20,9 @@ void MyApplication::initVulkan() {
     //创建窗口表面
     MyVulkanSurface::createSurface(&instance, window, &surface);
     //选择物理设备
-    MyVulkanPhysicalDevices::pickPhysicalDevice(&instance, &physicalDevice, &surface);
+    MyVulkanDevices::pickPhysicalDevice(&instance, &physicalDevice, &surface);
     //创建逻辑设备
-    MyVulkanLogicalDevices::createLogicalDevice(&physicalDevice, &device, &graphicsQueue, &surface, &presentQueue);
+    MyVulkanDevices::createLogicalDevice(&physicalDevice, &device, &graphicsQueue, &surface, &presentQueue);
     //创建交换链
     myVulkanSwapChain.createSwapChain(&physicalDevice, &surface, window, &swapChain, &device);
     //创建图像视图

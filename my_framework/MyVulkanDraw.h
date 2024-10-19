@@ -8,6 +8,7 @@
 #include "core.h"
 #include "MyVulkanRenderPass.h"
 #include "MyVulkanGraphicsPipeline.h"
+#include "MyVulkanDevices.h"
 
 class MyVulkanDraw {
 public:

@@ -4,16 +4,12 @@
 
 #pragma once
 
-#include "MyVulkanPhysicalDevices.h"
+#include "MyVulkanDevices.h"
 #include <vector>
 #include "core.h"
 #include <algorithm>
 #include <stdexcept>
 
-//设备扩展
-const std::vector<const char *> deviceExtensions = {
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME
-};
 //Swap Chain 支持详情
 struct SwapChainSupportDetails {
     VkSurfaceCapabilitiesKHR capabilities;

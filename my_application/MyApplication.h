@@ -4,10 +4,9 @@
 #pragma once
 
 #include "../../my_framework/core.h"
-//#include "../../my_framework/MyVulkanImageView.h"
+#include "../my_framework/MyVulkanDevices.h"
 #include "../../my_framework/MyVulkanGraphicsPipeline.h"
 #include "../../my_framework/MyValidationLayers.h"
-#include "../../my_framework/MyVulkanLogicalDevices.h"
 #include "../../my_framework/MyVulkanSurface.h"
 #include "../../my_framework/MyVulkanShaderCompile.h"
 #include "../../my_framework/MyVulkanFixedFuncs.h"

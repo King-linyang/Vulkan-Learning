@@ -101,7 +101,7 @@ void MyVulkanSwapChain::createSwapChain(VkPhysicalDevice *physicalDevice, VkSurf
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    QueueFamilyIndices indices = MyVulkanPhysicalDevices::findQueueFamilies(physicalDevice, surface);
+    QueueFamilyIndices indices = MyVulkanDevices::findQueueFamilies(physicalDevice, surface);
     uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
     if (indices.graphicsFamily != indices.presentFamily) {

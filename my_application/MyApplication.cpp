@@ -46,6 +46,8 @@ void MyApplication::initVulkan(const char *path) {
 
     //创建顶点缓冲区
     createVertexBuffer();
+    //创建索引缓冲区
+    createIndexBuffer();
 
     //创建命令缓冲
     createCommandBuffers();
@@ -68,6 +70,10 @@ void MyApplication::cleanup() {
     cleanupSwapChain();
 
     //清理顶点缓冲区
+    vkDestroyBuffer(device, vertexBuffer, nullptr);
+    vkFreeMemory(device, vertexBufferMemory, nullptr);
+
+    //清理索引缓冲区
     vkDestroyBuffer(device, vertexBuffer, nullptr);
     vkFreeMemory(device, vertexBufferMemory, nullptr);
 
@@ -484,9 +490,13 @@ void MyApplication::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t 
     VkBuffer vertexBuffers[] = {vertexBuffer};
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+    //绑定索引缓冲区
+    vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
+
+    //更改 drawing 命令以告诉 Vulkan 使用索引缓冲区
     //发出draw命令
-    vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
     vkCmdEndRenderPass(commandBuffer);
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
         throw std::runtime_error("failed to record command buffer!");
@@ -900,4 +910,28 @@ void MyApplication::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceS
 
     //释放命令缓冲区
     vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
+}
+
+void MyApplication::createIndexBuffer() {
+    //bufferSize 索引数乘以索引类型大小（或 uint16_t 或 uint32_t ）
+    VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+    createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
+                 stagingBufferMemory);
+
+    void *data;
+    vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+    memcpy(data, indices.data(), (size_t) bufferSize);
+    vkUnmapMemory(device, stagingBufferMemory);
+
+    createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
+
+    copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+
+    vkDestroyBuffer(device, stagingBuffer, nullptr);
+    vkFreeMemory(device, stagingBufferMemory, nullptr);
 }

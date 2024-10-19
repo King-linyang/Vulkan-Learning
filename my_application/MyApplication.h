@@ -140,6 +140,9 @@ public:
     //复制缓冲区
     void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
+    //创建索引缓冲区
+    void createIndexBuffer();
+
 public:
     //窗口发生调整
     bool framebufferResized = false;
@@ -206,6 +209,10 @@ private:
     VkBuffer vertexBuffer;
     //顶点缓冲区内存
     VkDeviceMemory vertexBufferMemory;
+
+    //用于保存索引缓冲区资源
+    VkBuffer indexBuffer;
+    VkDeviceMemory indexBufferMemory;
 private:
     // 初始化窗口
     void initWindow();

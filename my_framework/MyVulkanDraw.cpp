@@ -103,16 +103,16 @@ void MyVulkanDraw::recordCommandBuffer(uint32_t imageIndex, VkRenderPass renderP
 }
 
 void
-MyVulkanDraw::drawFrame(VkDevice device, VkSwapchainKHR swapChain, VkRenderPass renderPass, VkExtent2D swapChainExtent,
+MyVulkanDraw::drawFrame(VkDevice *device, VkSwapchainKHR swapChain, VkRenderPass renderPass, VkExtent2D swapChainExtent,
                         VkPipeline graphicsPipeline, VkQueue graphicsQueue, VkQueue presentQueue) {
     //等待上一帧
-    vkWaitForFences(device, 1, inFlightFence, VK_TRUE, UINT64_MAX);
+    vkWaitForFences(*device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
     //调用手动将 fence 重置为 unsignaled 状态
-    vkResetFences(device, 1, inFlightFence);
+    vkResetFences(*device, 1, &inFlightFence);
 
     //获取下一个图像
     uint32_t imageIndex;
-    vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, *imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+    vkAcquireNextImageKHR(*device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
     //录制命令缓冲区
     vkResetCommandBuffer(commandBuffer, 0);
@@ -121,7 +121,7 @@ MyVulkanDraw::drawFrame(VkDevice device, VkSwapchainKHR swapChain, VkRenderPass 
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-    VkSemaphore waitSemaphores[] = {*imageAvailableSemaphore};
+    VkSemaphore waitSemaphores[] = {imageAvailableSemaphore};
     VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
     submitInfo.waitSemaphoreCount = 1;
     submitInfo.pWaitSemaphores = waitSemaphores;
@@ -130,12 +130,12 @@ MyVulkanDraw::drawFrame(VkDevice device, VkSwapchainKHR swapChain, VkRenderPass 
     submitInfo.pCommandBuffers = &commandBuffer;
 
 
-    VkSemaphore signalSemaphores[] = {*renderFinishedSemaphore};
+    VkSemaphore signalSemaphores[] = {renderFinishedSemaphore};
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
 
-    if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, *inFlightFence) != VK_SUCCESS) {
+    if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS) {
         throw std::runtime_error("failed to submit draw command buffer!");
     }
 
@@ -153,7 +153,7 @@ MyVulkanDraw::drawFrame(VkDevice device, VkSwapchainKHR swapChain, VkRenderPass 
     vkQueuePresentKHR(presentQueue, &presentInfo);
 }
 
-void MyVulkanDraw::createSyncObjects(VkDevice device) {
+void MyVulkanDraw::createSyncObjects(VkDevice *device) {
     //信号量
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -164,9 +164,10 @@ void MyVulkanDraw::createSyncObjects(VkDevice device) {
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
 
-    if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, imageAvailableSemaphore) != VK_SUCCESS ||
-        vkCreateSemaphore(device, &semaphoreInfo, nullptr, renderFinishedSemaphore) != VK_SUCCESS ||
-        vkCreateFence(device, &fenceInfo, nullptr, inFlightFence) != VK_SUCCESS) {
+    //创建信号灯和栅栏
+    if (vkCreateSemaphore(*device, &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
+        vkCreateSemaphore(*device, &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS ||
+        vkCreateFence(*device, &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS) {
         throw std::runtime_error("failed to create semaphores!");
     }
 }

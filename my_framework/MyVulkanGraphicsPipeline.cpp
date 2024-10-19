@@ -8,8 +8,7 @@
 
 void MyVulkanGraphicsPipeline::createGraphicsPipeline(MyVulkanShaderCompile myVulkanShaderCompile, VkDevice *device,
                                                       MyVulkanSwapChain &myVulkanSwapChain,
-                                                      MyVulkanFixedFuncs myVulkanFixedFuncs,
-                                                      VkRenderPass renderPass, VkPipeline graphicsPipeline) {
+                                                      MyVulkanFixedFuncs myVulkanFixedFuncs, VkRenderPass renderPass) {
     // 加载着色器字节码
     std::vector<char> vertShaderCode = myVulkanShaderCompile.loadShader("vertex.vert");
     std::vector<char> fragShaderCode = myVulkanShaderCompile.loadShader("fragment.frag");
@@ -33,12 +32,13 @@ void MyVulkanGraphicsPipeline::createGraphicsPipeline(MyVulkanShaderCompile myVu
     fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
     fragShaderStageInfo.module = fragShaderModule;
     fragShaderStageInfo.pName = "main";
+
     //定义一个包含这两个结构的数组，使用它来在实际的管道创建步骤中引用它们
     VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
     //固定功能
     myVulkanFixedFuncs.createTriangle(myVulkanSwapChain, *device, pipelineLayout, shaderStages, renderPass,
-                                      graphicsPipeline);
+                                      &graphicsPipeline);
 
 
     //管道创建完成，销毁着色器模块

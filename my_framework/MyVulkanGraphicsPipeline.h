@@ -20,7 +20,7 @@ public:
     //创建一个图形管线
     void createGraphicsPipeline(MyVulkanShaderCompile myVulkanShaderCompile, VkDevice *device,
                                 MyVulkanSwapChain &myVulkanSwapChain, MyVulkanFixedFuncs myVulkanFixedFuncs,
-                                VkRenderPass renderPass, VkPipeline pT);
+                                VkRenderPass renderPass);
 
     //创建着色器模块 采用一个以字节码为参数的缓冲区，并从中创建一个 VkShaderModule
     VkShaderModule createShaderModule(const std::vector<char> &code, VkDevice device);

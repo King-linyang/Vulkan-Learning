@@ -31,11 +31,11 @@ public:
                              VkPipeline graphicsPipeline);
 
     //绘制
-    void drawFrame(VkDevice device, VkSwapchainKHR swapChain, VkRenderPass renderPass, VkExtent2D swapChainExtent,
+    void drawFrame(VkDevice *device, VkSwapchainKHR swapChain, VkRenderPass renderPass, VkExtent2D swapChainExtent,
                    VkPipeline graphicsPipeline, VkQueue graphicsQueue, VkQueue presentQueue);
 
     //创建同步对象
-    void createSyncObjects(VkDevice device);
+    void createSyncObjects(VkDevice *device);
 
 
     //获取帧缓冲区
@@ -49,10 +49,10 @@ public:
     }
 
     //清理同步对象
-    void cleanUpSyncObjects(VkDevice device) {
-        vkDestroySemaphore(device, *renderFinishedSemaphore, nullptr);
-        vkDestroySemaphore(device, *imageAvailableSemaphore, nullptr);
-        vkDestroyFence(device, *inFlightFence, nullptr);
+    void cleanUpSyncObjects(VkDevice *device) {
+        vkDestroySemaphore(*device, renderFinishedSemaphore, nullptr);
+        vkDestroySemaphore(*device, imageAvailableSemaphore, nullptr);
+        vkDestroyFence(*device, inFlightFence, nullptr);
     }
 
 private:
@@ -64,10 +64,10 @@ private:
     VkCommandBuffer commandBuffer;
 
     //信号量
-    VkSemaphore *imageAvailableSemaphore;
+    VkSemaphore imageAvailableSemaphore;
     //渲染完成的信号
-    VkSemaphore *renderFinishedSemaphore;
+    VkSemaphore renderFinishedSemaphore;
     //等待信号量
-    VkFence *inFlightFence;
+    VkFence inFlightFence;
 };
 

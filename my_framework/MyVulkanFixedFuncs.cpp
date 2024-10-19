@@ -7,7 +7,7 @@
 void MyVulkanFixedFuncs::createTriangle(MyVulkanSwapChain myVulkanSwapChain, VkDevice device,
                                         VkPipelineLayout pipelineLayout,
                                         VkPipelineShaderStageCreateInfo shaderStages[], VkRenderPass renderPass,
-                                        VkPipeline graphicsPipeline) {
+                                        VkPipeline *graphicsPipeline) {
     //顶点输入阶段
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -120,7 +120,7 @@ void MyVulkanFixedFuncs::createTriangle(MyVulkanSwapChain myVulkanSwapChain, VkD
     pipelineInfo.renderPass = renderPass;
     pipelineInfo.subpass = 0;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
-    if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
+    if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, graphicsPipeline) != VK_SUCCESS) {
         throw std::runtime_error("failed to create graphics pipeline!");
     }
 }

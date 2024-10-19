@@ -44,7 +44,7 @@ void MyApplication::initVulkan() {
     //创建命令池
     myVulkanDraw.createCommandPool(&physicalDevice, &surface, &device);
     //创建命令缓冲
-    myVulkanDraw.createCommandBuffer(&device);
+    myVulkanDraw.createCommandBuffers(&device);
     //创建同步对象
     myVulkanDraw.createSyncObjects(&device);
 }

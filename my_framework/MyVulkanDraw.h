@@ -23,8 +23,8 @@ public:
     //创建命令池
     void createCommandPool(VkPhysicalDevice *physicalDevice, VkSurfaceKHR *surface, VkDevice *device);
 
-    //创建命令缓冲区
-    void createCommandBuffer(VkDevice *device);
+    //创建多个命令缓冲区
+    void createCommandBuffers(VkDevice *device);
 
     //命令缓冲区录制 处理将要执行的命令写入命令缓冲区的
     void recordCommandBuffer(uint32_t imageIndex, VkRenderPass renderPass, VkExtent2D swapChainExtent,
@@ -34,7 +34,7 @@ public:
     void drawFrame(VkDevice *device, VkSwapchainKHR swapChain, VkRenderPass renderPass, VkExtent2D swapChainExtent,
                    VkPipeline graphicsPipeline, VkQueue graphicsQueue, VkQueue presentQueue);
 
-    //创建同步对象
+    //为每一帧创建同步对象
     void createSyncObjects(VkDevice *device);
 
 
@@ -48,11 +48,14 @@ public:
         vkDestroyCommandPool(*device, commandPool, nullptr);
     }
 
-    //清理同步对象
+    //清理每一帧的同步对象
     void cleanUpSyncObjects(VkDevice *device) {
-        vkDestroySemaphore(*device, renderFinishedSemaphore, nullptr);
-        vkDestroySemaphore(*device, imageAvailableSemaphore, nullptr);
-        vkDestroyFence(*device, inFlightFence, nullptr);
+        //在释放命令池时会释放命令缓冲区，因此无需执行任何额外操作即可进行命令缓冲区清理
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            vkDestroySemaphore(*device, renderFinishedSemaphores[i], nullptr);
+            vkDestroySemaphore(*device, imageAvailableSemaphores[i], nullptr);
+            vkDestroyFence(*device, inFlightFences[i], nullptr);
+        }
     }
 
 private:
@@ -60,14 +63,18 @@ private:
     std::vector<VkFramebuffer> swapChainFramebuffers;
     //命令池
     VkCommandPool commandPool;
-    //命令缓冲区
-    VkCommandBuffer commandBuffer;
 
-    //信号量
-    VkSemaphore imageAvailableSemaphore;
-    //渲染完成的信号
-    VkSemaphore renderFinishedSemaphore;
-    //等待信号量
-    VkFence inFlightFence;
+    //指定同时可以处理的帧数
+    const int MAX_FRAMES_IN_FLIGHT = 2;
+    //要每帧都使用正确的对象，我们需要跟踪当前帧。为此，我们将使用帧索引
+    uint32_t currentFrame = 0;
+    //为每一帧都创建一个命令缓冲区
+    std::vector<VkCommandBuffer> commandBuffers;
+    //每一帧的信号量
+    std::vector<VkSemaphore> imageAvailableSemaphores;
+    //每一帧渲染完成的信号
+    std::vector<VkSemaphore> renderFinishedSemaphores;
+    //每一帧飞行中的栅栏
+    std::vector<VkFence> inFlightFences;
 };
 

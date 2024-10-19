@@ -78,6 +78,9 @@ public:
         }
     }
 
+public:
+    //窗口发生调整
+    bool framebufferResized = false;
 private:
     //存储图像视图
     std::vector<VkImageView> swapChainImageViews;

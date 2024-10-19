@@ -18,3 +18,8 @@ MyEventLearning *MyEventLearning::getInstance() {
     }
     return myEventLearningTmp;
 }
+
+void MyEventLearning::framebufferResizeCallback(GLFWwindow *window, int width, int height) {
+    auto app = reinterpret_cast<MyVulkanDraw *>(glfwGetWindowUserPointer(window));
+    app->framebufferResized = true;
+}

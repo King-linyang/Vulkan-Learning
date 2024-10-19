@@ -7,9 +7,14 @@
 void MyApplication::initWindow() {
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    //wind窗口不可调整大小
+//    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
+
+    //存储一个指针
+    glfwSetWindowUserPointer(window, &myVulkanDraw);
     glfwSetMouseButtonCallback(window, myEventLearning->mouseCallback);
+    glfwSetFramebufferSizeCallback(window, myEventLearning->framebufferResizeCallback);
 }
 
 void MyApplication::initVulkan() {
@@ -69,6 +74,8 @@ void MyApplication::cleanup() {
     myVulkanGraphicsPipeline.cleanUpGraphicsPipeline(&device);
     myVulkanGraphicsPipeline.cleanUpPipelineLayout(&device);
 
+    //渲染通道
+    myVulkanRenderPass.cleanUp(&device);
     //清理同步对象
     myVulkanDraw.cleanUpSyncObjects(&device);
 
@@ -78,8 +85,6 @@ void MyApplication::cleanup() {
     //清理逻辑设备
     vkDestroyDevice(device, nullptr);
 
-    //销毁逻辑设备
-    vkDestroyDevice(device, nullptr);
     if (enableValidationLayers) {
         MyValidationLayers::DestroyDebugUtilsMessengerEXT(&instance, &debugMessenger, nullptr);
     }

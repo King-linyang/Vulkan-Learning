@@ -8,16 +8,20 @@ project(MyVulkanProject)
 set(CMAKE_CXX_STANDARD 17)
 
 #拷贝assets文件夹
-file(GLOB ASSETS "./assets" )
+file(GLOB ASSETS "./assets")
 file(COPY ${ASSETS} DESTINATION ${CMAKE_BINARY_DIR})
 
 #设置头文件查找
 include_directories(
         SYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/thirdParty/include
+        # 引入 boost 头文件
+        SYSTEM "E:\\B_software\\cpp_soft\\boost_1_86_0"
 )
 # 连接
 link_directories(
         SYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/thirdParty/lib
+        # 链接 boost 编译库
+        SYSTEM "E:\\B_software\\cpp_soft\\boost_1_86_0\\stage\\lib"
 )
 
 #添加子目录

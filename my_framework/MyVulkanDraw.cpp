@@ -205,6 +205,15 @@ void MyVulkanDraw::createSyncObjects(VkDevice *device) {
 void MyVulkanDraw::recreateSwapChain(VkPhysicalDevice *physicalDevice, VkSurfaceKHR *surface,
                                      GLFWwindow *window, VkSwapchainKHR *swapChain, VkDevice *device,
                                      MyVulkanSwapChain *myVulkanSwapChain, VkRenderPass renderPass) {
+    //交换链可能会过时，这是一种特殊的窗口大小调整：窗口最小化。这种情况很特殊，因为它将导致帧缓冲区大小为 0
+    //暂停窗口直到窗口再次位于前台
+    int width = 0, height = 0;
+    glfwGetFramebufferSize(window, &width, &height);
+    while (width == 0 || height == 0) {
+        glfwGetFramebufferSize(window, &width, &height);
+        glfwWaitEvents();
+    }
+
     vkDeviceWaitIdle(*device);
 
     cleanupSwapChain(*device, swapChain);

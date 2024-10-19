@@ -12,31 +12,60 @@
 #include <vulkan/vulkan.h>
 
 #include <iostream>
-#include "my_application/MyMemoryPoolManager.h"
+#include "my_application/my_memory_pool/MyMemoryPoolManager.h"
+
+// 用于测试的简单类
+class TestObject {
+public:
+    TestObject() : data(0) { std::cout << "TestObject constructed\n"; }
+
+    explicit TestObject(int d) : data(d) { std::cout << "TestObject constructed with " << d << "\n"; }
+
+    ~TestObject() { std::cout << "TestObject destructed\n"; }
+
+    int getData() const { return data; }
+
+private:
+    int data;
+};
 
 int main() {
-    // 使用小内存池分配内存
-    auto smallPtr = static_cast<int *>(ALLOCATE_SMALL_MEMORY(sizeof(int)));
-    *smallPtr = 42;
-    std::cout << "Small memory value: " << *smallPtr << std::endl;
 
-    // 使用中内存池分配内存
-    auto *mediumPtr = static_cast<double *>(ALLOCATE_MEDIUM_MEMORY(sizeof(double)));
-    *mediumPtr = 3.14;
-    std::cout << "Medium memory value: " << *mediumPtr << std::endl;
+    // 测试基本的分配和释放
+    TestObject *obj1 = POOL_ALLOCATE(TestObject);
+    assert(obj1 != nullptr);
+    new(obj1) TestObject();  // 显式调用构造函数
+    POOL_DEALLOCATE(obj1);
 
-    // 使用大内存池分配内存
-    auto largeArray = static_cast<char *>(ALLOCATE_LARGE_MEMORY(100 * sizeof(char)));
-    std::cout << "Large memory allocated." << std::endl;
-    auto *mediumPtr1 = static_cast<double *>(ALLOCATE_LARGE_MEMORY(sizeof(double)));
-    *mediumPtr1 = 3.14;
-    std::cout << "Medium memory value: " << *mediumPtr1 << std::endl;
+    // 测试使用POOL_NEW和poolDelete
+    TestObject *obj2 = POOL_NEW(TestObject, 42);
+    assert(obj2->getData() == 42);
+    POOL_DELETE(obj2);
 
-    // 释放内存
-    DEALLOCATE_SMALL_MEMORY(smallPtr);
-    DEALLOCATE_MEDIUM_MEMORY(mediumPtr);
-    DEALLOCATE_LARGE_MEMORY(largeArray);
-    DEALLOCATE_LARGE_MEMORY(mediumPtr1);
+    // 测试多次分配和释放
+    const int NUM_OBJECTS = 10;
+    std::vector<TestObject *> objects;
+    for (int i = 0; i < NUM_OBJECTS; ++i) {
+        objects.push_back(POOL_NEW(TestObject, i));
+    }
+    for (auto &obj: objects) {
+        POOL_DELETE(obj);
+    }
+
+    // 测试获取统计信息
+    size_t allocatedCount = MyMemoryPoolManager::getInstance().getAllocatedCount<TestObject>();
+    size_t totalCapacity = MyMemoryPoolManager::getInstance().getTotalCapacity<TestObject>();
+    size_t freeCount = MyMemoryPoolManager::getInstance().getFreeCount<TestObject>();
+
+    std::cout << "Allocated count: " << allocatedCount << std::endl;
+    std::cout << "Total capacity: " << totalCapacity << std::endl;
+    std::cout << "Free count: " << freeCount << std::endl;
+
+    assert(allocatedCount == 0);
+    assert(totalCapacity >= NUM_OBJECTS);
+    assert(freeCount == totalCapacity);
+
+    std::cout << "All tests passed!" << std::endl;
 
 //    glfwInit();
 //

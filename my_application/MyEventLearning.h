@@ -6,7 +6,7 @@
 
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include "MyMemoryPoolManager.h"
+#include "./my_memory_pool/MyMemoryPoolManager.h"
 
 #define myEventLearning MyEventLearning::getInstance()
 
@@ -14,7 +14,7 @@ class MyEventLearning {
 public:
     ~MyEventLearning() {
         //释放内存
-        DEALLOCATE_MEDIUM_MEMORY(myEventLearningTmp);
+        POOL_DELETE(myEventLearningTmp);
     };
 
     //用于访问实例的静态函数

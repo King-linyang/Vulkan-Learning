@@ -14,7 +14,7 @@ void MyEventLearning::mouseCallback(GLFWwindow *window, int button, int action, 
 MyEventLearning *MyEventLearning::getInstance() {
     //从内存池中申请内存实例
     if (myEventLearningTmp == nullptr) {
-        myEventLearningTmp = static_cast<MyEventLearning *>(ALLOCATE_MEDIUM_MEMORY(sizeof(MyEventLearning)));
+        myEventLearningTmp = static_cast<MyEventLearning *>(POOL_NEW(MyEventLearning));
     }
     return myEventLearningTmp;
 }

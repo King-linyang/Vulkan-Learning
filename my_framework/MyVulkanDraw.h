@@ -7,7 +7,6 @@
 #include <vector>
 #include "core.h"
 #include "MyVulkanRenderPass.h"
-#include "MyVulkanImageView.h"
 #include "MyVulkanGraphicsPipeline.h"
 
 class MyVulkanDraw {
@@ -17,8 +16,8 @@ public:
     ~MyVulkanDraw() = default;
 
     //创建帧缓冲区
-    void createFrameBuffers(MyVulkanImageView myVulkanImageView, MyVulkanRenderPass myVulkanRenderPass,
-                            MyVulkanSwapChain myVulkanSwapChain, VkDevice *device);
+    void createFrameBuffers(MyVulkanRenderPass myVulkanRenderPass, MyVulkanSwapChain myVulkanSwapChain,
+                            VkDevice *device);
 
     //创建命令池
     void createCommandPool(VkPhysicalDevice *physicalDevice, VkSurfaceKHR *surface, VkDevice *device);
@@ -31,12 +30,12 @@ public:
                              VkPipeline graphicsPipeline);
 
     //绘制
-    void drawFrame(VkDevice *device, VkSwapchainKHR swapChain, VkRenderPass renderPass, VkExtent2D swapChainExtent,
-                   VkPipeline graphicsPipeline, VkQueue graphicsQueue, VkQueue presentQueue);
+    void drawFrame(VkDevice *device, VkSwapchainKHR swapChain, VkRenderPass renderPass,
+                   MyVulkanSwapChain *myVulkanSwapChain, VkPipeline graphicsPipeline, VkQueue graphicsQueue,
+                   VkQueue presentQueue);
 
     //为每一帧创建同步对象
     void createSyncObjects(VkDevice *device);
-
 
     //获取帧缓冲区
     std::vector<VkFramebuffer> getSwapChainFramebuffers() {

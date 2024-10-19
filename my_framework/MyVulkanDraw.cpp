@@ -5,13 +5,13 @@
 #include "MyVulkanDraw.h"
 #include "MyVulkanGraphicsPipeline.h"
 
-void MyVulkanDraw::createFrameBuffers(MyVulkanImageView myVulkanImageView, MyVulkanRenderPass myVulkanRenderPass,
-                                      MyVulkanSwapChain myVulkanSwapChain, VkDevice *device) {
-    swapChainFramebuffers.resize(myVulkanImageView.getSwapChainImageViews().size());
+void MyVulkanDraw::createFrameBuffers(MyVulkanRenderPass myVulkanRenderPass, MyVulkanSwapChain myVulkanSwapChain,
+                                      VkDevice *device) {
+    swapChainFramebuffers.resize(myVulkanSwapChain.getSwapChainImageViews().size());
     //遍历视图创建帧缓冲区
-    for (size_t i = 0; i < myVulkanImageView.getSwapChainImageViews().size(); i++) {
+    for (size_t i = 0; i < myVulkanSwapChain.getSwapChainImageViews().size(); i++) {
         VkImageView attachments[] = {
-                myVulkanImageView.getSwapChainImageViews()[i]
+                myVulkanSwapChain.getSwapChainImageViews()[i]
         };
 
         VkFramebufferCreateInfo framebufferInfo{};
@@ -109,8 +109,9 @@ void MyVulkanDraw::recordCommandBuffer(uint32_t imageIndex, VkRenderPass renderP
 }
 
 void
-MyVulkanDraw::drawFrame(VkDevice *device, VkSwapchainKHR swapChain, VkRenderPass renderPass, VkExtent2D swapChainExtent,
-                        VkPipeline graphicsPipeline, VkQueue graphicsQueue, VkQueue presentQueue) {
+MyVulkanDraw::drawFrame(VkDevice *device, VkSwapchainKHR swapChain, VkRenderPass renderPass,
+                        MyVulkanSwapChain *myVulkanSwapChain, VkPipeline graphicsPipeline, VkQueue graphicsQueue,
+                        VkQueue presentQueue) {
     //等待上一帧
     vkWaitForFences(*device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
     //调用手动将 fence 重置为 unsignaled 状态
@@ -123,7 +124,7 @@ MyVulkanDraw::drawFrame(VkDevice *device, VkSwapchainKHR swapChain, VkRenderPass
 
     //录制命令缓冲区
     vkResetCommandBuffer(commandBuffers[currentFrame], 0);
-    recordCommandBuffer(imageIndex, renderPass, swapChainExtent, graphicsPipeline);
+    recordCommandBuffer(imageIndex, renderPass, myVulkanSwapChain->getSwapChainExtent(), graphicsPipeline);
     //提交命令缓冲区
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

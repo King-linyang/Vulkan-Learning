@@ -4,7 +4,7 @@
 #pragma once
 
 #include "../../my_framework/core.h"
-#include "../../my_framework/MyVulkanImageView.h"
+//#include "../../my_framework/MyVulkanImageView.h"
 #include "../../my_framework/MyVulkanGraphicsPipeline.h"
 #include "../../my_framework/MyValidationLayers.h"
 #include "../../my_framework/MyVulkanLogicalDevices.h"
@@ -35,8 +35,6 @@ public:
 private:
     // 交换链
     MyVulkanSwapChain myVulkanSwapChain;
-    //图像视图
-    MyVulkanImageView myVulkanImageView;
     //图形渲染管线
     MyVulkanGraphicsPipeline myVulkanGraphicsPipeline;
     //固定功能

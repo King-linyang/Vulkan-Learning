@@ -26,7 +26,7 @@ void MyApplication::initVulkan() {
     //创建交换链
     myVulkanSwapChain.createSwapChain(&physicalDevice, &surface, window, &swapChain, &device);
     //创建图像视图
-    myVulkanImageView.createImageViews(myVulkanSwapChain, &device);
+    myVulkanSwapChain.createImageViews(&device);
     //创建渲染过程
     myVulkanRenderPass.createRenderPass(myVulkanSwapChain, &device);
     //创建shader编译器
@@ -40,7 +40,7 @@ void MyApplication::initVulkan() {
     myVulkanGraphicsPipeline.createGraphicsPipeline(myVulkanShaderCompile, &device, myVulkanSwapChain,
                                                     myVulkanFixedFuncs, myVulkanRenderPass.getRenderPass());
     //创建帧缓冲
-    myVulkanDraw.createFrameBuffers(myVulkanImageView, myVulkanRenderPass, myVulkanSwapChain, &device);
+    myVulkanDraw.createFrameBuffers(myVulkanRenderPass, myVulkanSwapChain, &device);
     //创建命令池
     myVulkanDraw.createCommandPool(&physicalDevice, &surface, &device);
     //创建命令缓冲
@@ -56,7 +56,7 @@ void MyApplication::mainLoop() {
         glfwPollEvents();
         //渲染
         myVulkanDraw.drawFrame(&device, swapChain, myVulkanRenderPass.getRenderPass(),
-                               myVulkanSwapChain.getSwapChainExtent(), myVulkanGraphicsPipeline.getGraphicsPipeline(),
+                               &myVulkanSwapChain, myVulkanGraphicsPipeline.getGraphicsPipeline(),
                                graphicsQueue, presentQueue);
     }
 }
@@ -73,7 +73,7 @@ void MyApplication::cleanup() {
     //清理渲染过程
     myVulkanRenderPass.cleanUp(&device);
     //清理图像视图
-    myVulkanImageView.cleanUp(&device);
+    myVulkanSwapChain.cleanUpImageView(&device);
     //清理交换链
     vkDestroySwapchainKHR(device, swapChain, nullptr);
     //销毁逻辑设备

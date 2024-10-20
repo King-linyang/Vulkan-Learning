@@ -11,8 +11,12 @@
 
 //顶点颜色数据
 struct Vertex_PointColor {
+    //顶点位置
     glm::vec2 pos;
+    //顶点颜色
     glm::vec3 color;
+    //纹理坐标
+    glm::vec2 texCoord;
 
     //绑定描述
     static VkVertexInputBindingDescription getBindingDescription() {
@@ -29,9 +33,9 @@ struct Vertex_PointColor {
     }
 
     //属性描述--如何处理顶点输入
-    static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
+    static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
         //描述如何从源自绑定描述的顶点数据块中提取顶点属性
-        std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
+        std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
         //binding 参数告诉 Vulkan 每个顶点数据的绑定来自哪个
         attributeDescriptions[0].binding = 0;
         //location 参数引用顶点着色器中输入的 location 指令
@@ -48,16 +52,22 @@ struct Vertex_PointColor {
         //offset 参数指定自要从中读取的每顶点数据开始以来的字节数,绑定一次加载一个 Vertex ，并且 position 属性 （ pos ） 与此结构的开头相距字节数 0
         attributeDescriptions[1].offset = offsetof(Vertex_PointColor, color);
 
+        //纹理
+        attributeDescriptions[2].binding = 0;
+        attributeDescriptions[2].location = 2;
+        attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[2].offset = offsetof(Vertex_PointColor, texCoord);
         return attributeDescriptions;
     }
 };
 
 //顶点索引
+//从 0, 0 左上角到 1, 1 右下角的坐标简单地用纹理填充方块
 const std::vector<Vertex_PointColor> vertices = {
-        {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-        {{0.5f,  -0.5f}, {0.0f, 1.0f, 0.0f}},
-        {{0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}},
-        {{-0.5f, 0.5f},  {1.0f, 1.0f, 1.0f}}
+        {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+        {{0.5f,  -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+        {{-0.5f, 0.5f},  {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 };
 
 //索引缓冲区

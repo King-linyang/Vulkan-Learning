@@ -7,7 +7,6 @@
 #include "../../my_framework/MyValidationLayers.h"
 #include "../../my_framework/MyVulkanShaderCompile.h"
 #include "../../my_framework/MyVulkanFixedFuncs.h"
-#include "MyEventLearning.h"
 
 #include <iostream>
 #include <fstream>
@@ -52,6 +51,11 @@ const std::vector<const char *> deviceExtensions = {
 
 class MyApplication {
 public:
+    static void framebufferResizeCallback(GLFWwindow *_window, int width, int height) {
+        auto app = reinterpret_cast<MyApplication *>(glfwGetWindowUserPointer(_window));
+        app->framebufferResized = true;
+    }
+
     MyApplication() = default;
 
     ~MyApplication() = default;
@@ -159,9 +163,39 @@ public:
     //用于自己分配描述符集
     void createDescriptorSets();
 
+    //创建纹理
+    void createTextureImage(const char *path);
+
+    //创建纹理图像视图
+    void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
+                     VkMemoryPropertyFlags properties, VkImage &image, VkDeviceMemory &imageMemory);
+
+
+    VkCommandBuffer beginSingleTimeCommands();
+
+    void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+
+    //记录和执行 vkCmdCopyBufferToImage
+    void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+
+    //把缓存拷贝到图像
+    void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+
+    //创建纹理图像视图
+    void createTextureImageView();
+
+    //创建图像视图
+    VkImageView createImageView(VkImage image, VkFormat format);
+
+    //创建纹理采样器
+    void createTextureSampler();
+
 public:
     //窗口发生调整
     bool framebufferResized = false;
+
+    //资源目录
+    const char *resourceDir;
 private:
     //固定功能
     MyVulkanFixedFuncs myVulkanFixedFuncs;
@@ -241,6 +275,15 @@ private:
     VkDescriptorPool descriptorPool;
     //保存描述符集句柄
     std::vector<VkDescriptorSet> descriptorSets;
+
+    //纹理
+    VkImage textureImage;
+    //纹理图像缓冲区
+    VkDeviceMemory textureImageMemory;
+    //纹理图像视图
+    VkImageView textureImageView;
+    //纹理采样器
+    VkSampler textureSampler;
 
 private:
     // 初始化窗口

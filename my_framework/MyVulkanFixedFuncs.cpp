@@ -4,6 +4,10 @@
 
 #include "MyVulkanFixedFuncs.h"
 
+#include "MyData.h"
+#include <vector>
+#include <stdexcept>
+
 void MyVulkanFixedFuncs::createTriangle(VkExtent2D swapChainExtent, VkDevice device,
                                         VkPipelineLayout pipelineLayout, VkPipelineShaderStageCreateInfo shaderStages[],
                                         VkRenderPass renderPass, VkPipeline *graphicsPipeline) {

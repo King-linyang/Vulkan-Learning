@@ -3,12 +3,7 @@
 // 固定功能
 
 #pragma once
-
 #include "core.h"
-#include "MyData.h"
-#include <vector>
-#include <stdexcept>
-#include <array>
 
 class MyVulkanFixedFuncs {
 public:

@@ -3,11 +3,16 @@
 //
 
 #include "MyApplication.h"
+#include <unordered_map>
 
-//stb_image
+//图片加载使用
 #define STB_IMAGE_IMPLEMENTATION
 
 #include "../../my_application/stb_image.h"
+//模型加载使用
+#define TINYOBJLOADER_IMPLEMENTATION
+
+#include "../../my_application/tiny_obj_loader.h"
 
 void MyApplication::initWindow() {
     glfwInit();
@@ -59,6 +64,9 @@ void MyApplication::initVulkan(const char *path) {
     createTextureImageView();
     //创建纹理采样器
     createTextureSampler();
+
+    //加载模型--顶点和索引缓冲区之前
+    loadModel(path);
 
     //创建顶点缓冲区
     createVertexBuffer();
@@ -559,7 +567,7 @@ void MyApplication::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t 
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
     //绑定索引缓冲区
-    vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+    vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
     //绑定描述符集
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1,
@@ -1112,9 +1120,11 @@ void MyApplication::createDescriptorSets() {
 
 void MyApplication::createTextureImage(const char *path) {
     int texWidth, texHeight, texChannels;
-    std::string texturePathT = std::string(path) + std::string("texture.jpg");
+//    std::string texturePathT = std::string(path) + std::string("texture.jpg");
+    std::string texturePathT = std::string(path) + std::string(MODEL_TEXTURE_PATH);
 
-    stbi_uc *pixels = stbi_load(texturePathT.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    stbi_uc *pixels = stbi_load(texturePathT.c_str(), &texWidth, &texHeight,
+                                &texChannels, STBI_rgb_alpha);
 
     VkDeviceSize imageSize = texWidth * texHeight * 4;
 
@@ -1461,4 +1471,57 @@ VkFormat MyApplication::findDepthFormat() {
 
 bool MyApplication::hasStencilComponent(VkFormat format) {
     return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
+}
+
+/**
+ * OBJ 文件由位置、法线、纹理坐标和面组成。
+ * 面由任意数量的顶点组成，其中每个顶点通过索引引用位置、法线和/或纹理坐标。
+ * @param path
+ */
+void MyApplication::loadModel(const char *path) {
+    //容器 attrib 包含其 attrib.vertices 中的所有
+    // attrib.normals 位置、法线和纹理坐标，
+    // 以及 attrib.texcoords 向量
+    tinyobj::attrib_t attrib;
+    //shapes 包含所有单独的对象及其面
+    //每个面都由一个顶点数组组成，每个顶点都包含位置、法线和纹理坐标属性的索引
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string warn, err;
+
+    std::string texturePathT = std::string(path) + std::string(MODEL_PATH);
+    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, texturePathT.c_str())) {
+        throw std::runtime_error(warn + err);
+    }
+
+    std::unordered_map<Vertex_PointColor, uint32_t> uniqueVertices{};
+
+    //将把文件中的所有面合并到一个模型中
+    for (const auto &shape: shapes) {
+        //三角剖分功能已经确保每个面有三个顶点，因此我们现在可以直接迭代这些顶点并将它们直接转储到我们的 vertices 向量中
+        for (const auto &index: shape.mesh.indices) {
+            Vertex_PointColor vertex{};
+            vertex.pos = {
+                    attrib.vertices[3 * index.vertex_index + 0],
+                    attrib.vertices[3 * index.vertex_index + 1],
+                    attrib.vertices[3 * index.vertex_index + 2]
+            };
+            vertex.texCoord = {
+                    attrib.texcoords[2 * index.texcoord_index + 0],
+                    1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+            };
+            vertex.color = {1.0f, 1.0f, 1.0f};
+            if (uniqueVertices.count(vertex) == 0) {
+                uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+                vertices.push_back(vertex);
+            }
+
+            //删除顶点数据
+            if (uniqueVertices.count(vertex) == 0) {
+                uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+                vertices.push_back(vertex);
+            }
+            indices.push_back(uniqueVertices[vertex]);
+        }
+    }
 }

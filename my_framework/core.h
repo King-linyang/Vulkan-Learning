@@ -13,6 +13,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+//包含 GLM 类型的哈希函数
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 
 //glm需要开启这个宏
 #define GLM_ENABLE_EXPERIMENTAL

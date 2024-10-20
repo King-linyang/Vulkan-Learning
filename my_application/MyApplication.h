@@ -7,6 +7,7 @@
 #include "../../my_framework/MyValidationLayers.h"
 #include "../../my_framework/MyVulkanShaderCompile.h"
 #include "../../my_framework/MyVulkanFixedFuncs.h"
+#include "../my_framework/MyData.h"
 
 #include <iostream>
 #include <fstream>
@@ -203,12 +204,23 @@ public:
     //所选的深度格式是否包含模板组件
     bool hasStencilComponent(VkFormat format);
 
+    //加载模型函数--路径为模型根路径
+    void loadModel(const char *path);
+
 public:
     //窗口发生调整
     bool framebufferResized = false;
-
     //资源目录
     const char *resourceDir;
+
+    //顶点索引-使用模型进行填充
+    std::vector<Vertex_PointColor> vertices;
+    //索引缓冲区-使用模型进行填充
+    std::vector<uint32_t> indices;
+    // 模型路径
+    const std::string MODEL_PATH = "viking_room.obj";
+    // 纹理路径
+    const std::string MODEL_TEXTURE_PATH = "viking_room.png";
 private:
     //固定功能
     MyVulkanFixedFuncs myVulkanFixedFuncs;

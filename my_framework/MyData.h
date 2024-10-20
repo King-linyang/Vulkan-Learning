@@ -65,9 +65,9 @@ const std::vector<uint16_t> indices = {
         0, 1, 2, 2, 3, 0
 };
 
-//uniform 变量
+//uniform 变量,alignas(16) 表示对齐到 16 字节,不写这个会有奇怪问题
 struct UniformBufferObject {
-    glm::mat4 model;
-    glm::mat4 view;
-    glm::mat4 proj;
+    alignas(16) glm::mat4 model;
+    alignas(16) glm::mat4 view;
+    alignas(16) glm::mat4 proj;
 };

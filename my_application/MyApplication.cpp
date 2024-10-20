@@ -36,6 +36,8 @@ void MyApplication::initVulkan(const char *path) {
 
     //创建渲染过程
     createRenderPass();
+    //创建描述符集
+    createDescriptorSetLayout();
     //创建图形管线
     createGraphicsPipeline(path);
 
@@ -48,6 +50,12 @@ void MyApplication::initVulkan(const char *path) {
     createVertexBuffer();
     //创建索引缓冲区
     createIndexBuffer();
+    //创建 uniform 缓冲
+    createUniformBuffers();
+    //创建池描述符
+    createDescriptorPool();
+    //用于自己分配描述符集
+    createDescriptorSets();
 
     //创建命令缓冲
     createCommandBuffers();
@@ -69,14 +77,6 @@ void MyApplication::cleanup() {
     //清理swapChain
     cleanupSwapChain();
 
-    //清理顶点缓冲区
-    vkDestroyBuffer(device, vertexBuffer, nullptr);
-    vkFreeMemory(device, vertexBufferMemory, nullptr);
-
-    //清理索引缓冲区
-    vkDestroyBuffer(device, vertexBuffer, nullptr);
-    vkFreeMemory(device, vertexBufferMemory, nullptr);
-
     //销毁图形管线
     vkDestroyPipeline(device, graphicsPipeline, nullptr);
     //销毁管道
@@ -84,6 +84,25 @@ void MyApplication::cleanup() {
 
     //渲染通道
     vkDestroyRenderPass(device, renderPass, nullptr);
+
+    //清理uniform缓冲区
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        vkDestroyBuffer(device, uniformBuffers[i], nullptr);
+        vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
+    }
+
+    //清理 池
+    vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+    //清理描述符集
+    vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+
+    //清理索引缓冲区
+    vkDestroyBuffer(device, indexBuffer, nullptr);
+    vkFreeMemory(device, indexBufferMemory, nullptr);
+
+    //清理顶点缓冲区
+    vkDestroyBuffer(device, vertexBuffer, nullptr);
+    vkFreeMemory(device, vertexBufferMemory, nullptr);
 
     //清理同步对象
     //在释放命令池时会释放命令缓冲区，因此无需执行任何额外操作即可进行命令缓冲区清理
@@ -248,8 +267,8 @@ void MyApplication::createGraphicsPipeline(const char *path) {
     VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
     //固定功能
-    myVulkanFixedFuncs.createTriangle1(swapChainExtent, device, pipelineLayout, shaderStages, renderPass,
-                                       &graphicsPipeline);
+    myVulkanFixedFuncs.createTriangle1(swapChainExtent, device, &pipelineLayout, shaderStages, renderPass,
+                                       &graphicsPipeline, &descriptorSetLayout);
 
     //管道创建完成，销毁着色器模块
     vkDestroyShaderModule(device, fragShaderModule, nullptr);
@@ -493,6 +512,9 @@ void MyApplication::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t 
     //绑定索引缓冲区
     vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
+    //绑定描述符集
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1,
+                            &descriptorSets[currentFrame], 0, nullptr);
 
     //更改 drawing 命令以告诉 Vulkan 使用索引缓冲区
     //发出draw命令
@@ -518,6 +540,9 @@ void MyApplication::drawFrame() {
     } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
         throw std::runtime_error("failed to acquire swap chain image!");
     }
+
+    //更新 uniform 缓冲
+    updateUniformBuffer(currentFrame);
 
     //调用手动将 fence 重置为 unsignaled 状态
     vkResetFences(device, 1, &inFlightFences[currentFrame]);
@@ -934,4 +959,120 @@ void MyApplication::createIndexBuffer() {
 
     vkDestroyBuffer(device, stagingBuffer, nullptr);
     vkFreeMemory(device, stagingBufferMemory, nullptr);
+}
+
+void MyApplication::createDescriptorSetLayout() {
+    //描述符集绑定
+    VkDescriptorSetLayoutBinding uboLayoutBinding{};
+    //描述符
+    uboLayoutBinding.binding = 0;
+    //描述符的类型
+    uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    //描述符在着色器中使用的次数
+    uboLayoutBinding.descriptorCount = 1;
+    //指定要在哪个着色器阶段引用描述符
+    uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    //仅与图像采样相关的描述符相关
+    uboLayoutBinding.pImmutableSamplers = nullptr;
+
+    //描述符集布局
+    VkDescriptorSetLayoutCreateInfo layoutInfo{};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = 1;
+    layoutInfo.pBindings = &uboLayoutBinding;
+
+    if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create descriptor set layout!");
+    }
+}
+
+void MyApplication::createUniformBuffers() {
+    VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+
+    uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+    uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i],
+                     uniformBuffersMemory[i]);
+
+        vkMapMemory(device, uniformBuffersMemory[i], 0, bufferSize, 0, &uniformBuffersMapped[i]);
+    }
+}
+
+void MyApplication::updateUniformBuffer(uint32_t currentImage) {
+    //几何体每秒旋转 90 度，而不管帧速率如何。
+    static auto startTime = std::chrono::high_resolution_clock::now();
+
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+    //绕 z 轴旋转
+    UniformBufferObject ubo{};
+    ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    //以 45 度角从上方查看几何体
+    ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    //45 度垂直视野的透视投影
+    ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f,
+                                10.0f);
+    ubo.proj[1][1] *= -1;
+
+    //将 uniform buffer 对象中的数据复制到当前的 uniform 缓冲区
+    memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
+}
+
+void MyApplication::createDescriptorPool() {
+    //描述我们的描述符集将包含哪些描述符类型以及其中有多少种
+    VkDescriptorPoolSize poolSize{};
+    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+    //将为每个帧分配其中一个描述符
+    VkDescriptorPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    poolInfo.poolSizeCount = 1;
+    poolInfo.pPoolSizes = &poolSize;
+    //指定可以分配的描述符集的最大数量
+    poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create descriptor pool!");
+    }
+}
+
+void MyApplication::createDescriptorSets() {
+    //指定要从中分配的描述符池、要分配的描述符集数量以及它们所基于的描述符集布局
+    std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
+    VkDescriptorSetAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocInfo.descriptorPool = descriptorPool;
+    allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    allocInfo.pSetLayouts = layouts.data();
+
+    //分配描述符
+    descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+    if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate descriptor sets!");
+    }
+
+    //填充每个描述符
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        VkDescriptorBufferInfo bufferInfo{};
+        bufferInfo.buffer = uniformBuffers[i];
+        bufferInfo.offset = 0;
+        bufferInfo.range = sizeof(UniformBufferObject);
+
+        VkWriteDescriptorSet descriptorWrite{};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = descriptorSets[i];
+        descriptorWrite.dstBinding = 0;
+        descriptorWrite.dstArrayElement = 0;
+
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorWrite.descriptorCount = 1;
+
+        descriptorWrite.pBufferInfo = &bufferInfo;
+        vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+    }
 }

@@ -98,9 +98,9 @@ void MyVulkanFixedFuncs::createTriangle(VkExtent2D swapChainExtent, VkDevice dev
     }
 }
 
-void MyVulkanFixedFuncs::createTriangle1(VkExtent2D swapChainExtent, VkDevice device, VkPipelineLayout pipelineLayout,
+void MyVulkanFixedFuncs::createTriangle1(VkExtent2D swapChainExtent, VkDevice device, VkPipelineLayout *pipelineLayout,
                                          VkPipelineShaderStageCreateInfo *shaderStages, VkRenderPass renderPass,
-                                         VkPipeline *graphicsPipeline) {
+                                         VkPipeline *graphicsPipeline, VkDescriptorSetLayout *descriptorSetLayout) {
     //修改描述
     auto bindingDescription = Vertex_PointColor::getBindingDescription();
     auto attributeDescriptions = Vertex_PointColor::getAttributeDescriptions();
@@ -133,7 +133,7 @@ void MyVulkanFixedFuncs::createTriangle1(VkExtent2D swapChainExtent, VkDevice de
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1.0f;
     rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-    rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_FALSE;
 
     //多重采样
@@ -173,10 +173,11 @@ void MyVulkanFixedFuncs::createTriangle1(VkExtent2D swapChainExtent, VkDevice de
     //管道布局
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 0;
-    pipelineLayoutInfo.pushConstantRangeCount = 0;
+    //指定描述符集布局
+    pipelineLayoutInfo.setLayoutCount = 1;
+    pipelineLayoutInfo.pSetLayouts = descriptorSetLayout;
 
-    if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
+    if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, pipelineLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");
     }
     VkGraphicsPipelineCreateInfo pipelineInfo{};
@@ -190,7 +191,7 @@ void MyVulkanFixedFuncs::createTriangle1(VkExtent2D swapChainExtent, VkDevice de
     pipelineInfo.pMultisampleState = &multisampling;
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = &dynamicState;
-    pipelineInfo.layout = pipelineLayout;
+    pipelineInfo.layout = *pipelineLayout;
     pipelineInfo.renderPass = renderPass;
     pipelineInfo.subpass = 0;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;

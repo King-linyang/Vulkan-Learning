@@ -22,8 +22,8 @@ public:
                         VkPipeline *graphicsPipeline);
 
     //创建三角形，使用顶点缓冲区
-    void createTriangle1(VkExtent2D swapChainExtent, VkDevice device, VkPipelineLayout pipelineLayout,
+    void createTriangle1(VkExtent2D swapChainExtent, VkDevice device, VkPipelineLayout *pipelineLayout,
                          VkPipelineShaderStageCreateInfo shaderStages[], VkRenderPass renderPass,
-                         VkPipeline *graphicsPipeline);
+                         VkPipeline *graphicsPipeline, VkDescriptorSetLayout *descriptorSetLayout);
 };
 

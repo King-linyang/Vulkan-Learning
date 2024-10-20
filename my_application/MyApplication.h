@@ -20,6 +20,7 @@
 #include <limits>
 #include <optional>
 #include <set>
+#include <chrono>
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -143,6 +144,21 @@ public:
     //创建索引缓冲区
     void createIndexBuffer();
 
+    //创建描述集布局
+    void createDescriptorSetLayout();
+
+    //创建 uniform 缓冲
+    void createUniformBuffers();
+
+    //更新 uniform 缓冲
+    void updateUniformBuffer(uint32_t currentImage);
+
+    //创建 池 描述符
+    void createDescriptorPool();
+
+    //用于自己分配描述符集
+    void createDescriptorSets();
+
 public:
     //窗口发生调整
     bool framebufferResized = false;
@@ -213,6 +229,19 @@ private:
     //用于保存索引缓冲区资源
     VkBuffer indexBuffer;
     VkDeviceMemory indexBufferMemory;
+    //用于保存uniform缓冲区资源-多缓冲区
+    std::vector<VkBuffer> uniformBuffers;
+    std::vector<VkDeviceMemory> uniformBuffersMemory;
+    std::vector<void *> uniformBuffersMapped;
+
+    //描述集布局
+    VkDescriptorSetLayout descriptorSetLayout;
+
+    //池描述符
+    VkDescriptorPool descriptorPool;
+    //保存描述符集句柄
+    std::vector<VkDescriptorSet> descriptorSets;
+
 private:
     // 初始化窗口
     void initWindow();

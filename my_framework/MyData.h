@@ -12,7 +12,7 @@
 //顶点颜色数据
 struct Vertex_PointColor {
     //顶点位置
-    glm::vec2 pos;
+    glm::vec3 pos;
     //顶点颜色
     glm::vec3 color;
     //纹理坐标
@@ -41,7 +41,7 @@ struct Vertex_PointColor {
         //location 参数引用顶点着色器中输入的 location 指令
         attributeDescriptions[0].location = 0;
         //顶点着色器中具有 location 0 的输入是 position 它有两个 32 位浮点分量
-        attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
         //format 参数描述属性的数据类型
         attributeDescriptions[0].offset = offsetof(Vertex_PointColor, pos);
 
@@ -64,15 +64,21 @@ struct Vertex_PointColor {
 //顶点索引
 //从 0, 0 左上角到 1, 1 右下角的坐标简单地用纹理填充方块
 const std::vector<Vertex_PointColor> vertices = {
-        {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-        {{0.5f,  -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{0.5f,  0.5f},  {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-        {{-0.5f, 0.5f},  {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
+        {{-0.5f, -0.5f, 0.0f},  {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+        {{0.5f,  -0.5f, 0.0f},  {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+        {{0.5f,  0.5f,  0.0f},  {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+        {{-0.5f, 0.5f,  0.0f},  {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+
+        {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+        {{0.5f,  -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+        {{0.5f,  0.5f,  -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+        {{-0.5f, 0.5f,  -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
 };
 
 //索引缓冲区
 const std::vector<uint16_t> indices = {
-        0, 1, 2, 2, 3, 0
+        0, 1, 2, 2, 3, 0,
+        4, 5, 6, 6, 7, 4
 };
 
 //uniform 变量,alignas(16) 表示对齐到 16 字节,不写这个会有奇怪问题

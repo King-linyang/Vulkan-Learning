@@ -142,6 +142,19 @@ void MyVulkanFixedFuncs::createTriangle1(VkExtent2D swapChainExtent, VkDevice de
     multisampling.sampleShadingEnable = VK_FALSE;
     multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
+    //图形管道中启用深度测试
+    VkPipelineDepthStencilStateCreateInfo depthStencil{};
+    depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    //指定是否应将新片段的深度与深度缓冲区进行比较，以查看是否应丢弃它们
+    depthStencil.depthTestEnable = VK_TRUE;
+    //指定是否应将通过深度测试的片段的新深度实际写入深度缓冲区
+    depthStencil.depthWriteEnable = VK_TRUE;
+    //指定为保留或丢弃片段而执行的比较。我们坚持较低的深度 = 更近的约定，因此新片段的深度应该更小。
+    depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+    depthStencil.depthBoundsTestEnable = VK_FALSE;
+    //配置模板缓冲区操作
+    depthStencil.stencilTestEnable = VK_FALSE;
+
     //颜色混合
     VkPipelineColorBlendAttachmentState colorBlendAttachment{};
     colorBlendAttachment.colorWriteMask =
@@ -189,6 +202,8 @@ void MyVulkanFixedFuncs::createTriangle1(VkExtent2D swapChainExtent, VkDevice de
     pipelineInfo.pViewportState = &viewportState;
     pipelineInfo.pRasterizationState = &rasterizer;
     pipelineInfo.pMultisampleState = &multisampling;
+    //引用深度模板状态
+    pipelineInfo.pDepthStencilState = &depthStencil;
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = &dynamicState;
     pipelineInfo.layout = *pipelineLayout;

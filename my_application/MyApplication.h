@@ -185,10 +185,23 @@ public:
     void createTextureImageView();
 
     //创建图像视图
-    VkImageView createImageView(VkImage image, VkFormat format);
+    VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 
     //创建纹理采样器
     void createTextureSampler();
+
+    //创建深度图像资源
+    void createDepthResources();
+
+    //查找支持的格式 从最理想到最不理想的顺序获取候选格式列表，并检查哪个是第一个支持的格式
+    VkFormat findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling,
+                                 VkFormatFeatureFlags features);
+
+    //选择具有支持用作深度附件的深度组件的格式
+    VkFormat findDepthFormat();
+
+    //所选的深度格式是否包含模板组件
+    bool hasStencilComponent(VkFormat format);
 
 public:
     //窗口发生调整
@@ -284,6 +297,13 @@ private:
     VkImageView textureImageView;
     //纹理采样器
     VkSampler textureSampler;
+
+    //深度图像
+    VkImage depthImage;
+    //深度图像内存
+    VkDeviceMemory depthImageMemory;
+    //深度图像 图像视图
+    VkImageView depthImageView;
 
 private:
     // 初始化窗口

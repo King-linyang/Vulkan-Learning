@@ -44,11 +44,14 @@ void MyApplication::initVulkan(const char *path) {
     createDescriptorSetLayout();
     //创建图形管线
     createGraphicsPipeline(path);
+    //创建命令池
+    createCommandPool();
+
+    //创建深度图像资源-帧缓冲之前-确保在实际创建深度图像视图之后调用它
+    createDepthResources();
 
     //创建帧缓冲
     createFrameBuffers();
-    //创建命令池
-    createCommandPool();
 
     //创建纹理
     createTextureImage(resourceDir);
@@ -215,31 +218,50 @@ void MyApplication::createRenderPass() {
     colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
+    //深度
+    VkAttachmentDescription depthAttachment{};
+    depthAttachment.format = findDepthFormat();
+    depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
     //子通道
+    //子通道只能使用单个深度 （+模板） 附件
     VkAttachmentReference colorAttachmentRef{};
     colorAttachmentRef.attachment = 0;
     colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+    //添加对第一个（也是唯一一个）子通道的附件的引用
+    VkAttachmentReference depthAttachmentRef{};
+    depthAttachmentRef.attachment = 1;
+    depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
     VkSubpassDescription subpass{};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorAttachmentRef;
+    subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
     //子通道依赖
     VkSubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.srcAccessMask = 0;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+    dependency.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    dependency.dstStageMask =
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
     //渲染通道
+    std::array<VkAttachmentDescription, 2> attachments = {colorAttachment, depthAttachment};
     VkRenderPassCreateInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = 1;
-    renderPassInfo.pAttachments = &colorAttachment;
+    renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+    renderPassInfo.pAttachments = attachments.data();
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
     renderPassInfo.dependencyCount = 1;
@@ -438,15 +460,17 @@ void MyApplication::createFrameBuffers() {
     swapChainFramebuffers.resize(swapChainImageViews.size());
     //遍历视图创建帧缓冲区
     for (size_t i = 0; i < swapChainImageViews.size(); i++) {
-        VkImageView attachments[] = {
-                swapChainImageViews[i]
+        //将深度图像视图指定为第二个附件
+        std::array<VkImageView, 2> attachments = {
+                swapChainImageViews[i],
+                depthImageView
         };
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferInfo.renderPass = renderPass;
-        framebufferInfo.attachmentCount = 1;
-        framebufferInfo.pAttachments = attachments;
+        framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        framebufferInfo.pAttachments = attachments.data();
         framebufferInfo.width = swapChainExtent.width;
         framebufferInfo.height = swapChainExtent.height;
         framebufferInfo.layers = 1;
@@ -503,9 +527,15 @@ void MyApplication::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t 
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = swapChainExtent;
 
-    VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
-    renderPassInfo.clearValueCount = 1;
-    renderPassInfo.pClearValues = &clearColor;
+    //清理多个附件--clear顺序和附件顺序相同
+    std::array<VkClearValue, 2> clearValues{};
+    //颜色
+    clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+    //深度
+    clearValues[1].depthStencil = {1.0f, 0};
+
+    renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+    renderPassInfo.pClearValues = clearValues.data();
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
@@ -631,6 +661,8 @@ void MyApplication::recreateSwapChain() {
 
     createSwapChain();
     createImageViews();
+    //窗口改变深度缓冲区的分辨率也要改
+    createDepthResources();
     createFrameBuffers();
 }
 
@@ -661,37 +693,16 @@ void MyApplication::createImageViews() {
     swapChainImageViews.resize(swapChainImages.size());
     //设置迭代所有交换链映像的循环
     for (size_t i = 0; i < swapChainImages.size(); i++) {
-        swapChainImageViews[i] = createImageView(swapChainImages[i], swapChainImageFormat);
-//        //subresourceRange 字段描述图像的用途以及应访问图像的哪个部分。我们的图像将用作颜色目标，无需任何 mipmap 级别或多个图层。
-//        VkImageViewCreateInfo createInfo{};
-//        createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-//        createInfo.image = swapChainImages[i];
-//
-//        //viewType 参数允许您将图像视为 1D 纹理、2D 纹理、3D 纹理和立方体贴图。
-//        createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-//        createInfo.format = swapChainImageFormat;
-//
-//        //components 字段允许您重排颜色通道。例如，可以将所有通道映射到单色纹理的红色通道。您还可以将 0 和 1 的常量值映射到通道
-//        createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-//        createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-//        createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-//        createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-//
-//        //subresourceRange 字段描述图像的用途以及应访问图像的哪个部分。我们的图像将用作颜色目标，无需任何 mipmap 级别或多个图层。
-//        createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-//        createInfo.subresourceRange.baseMipLevel = 0;
-//        createInfo.subresourceRange.levelCount = 1;
-//        createInfo.subresourceRange.baseArrayLayer = 0;
-//        createInfo.subresourceRange.layerCount = 1;
-//
-//        //创建 image 视图
-//        if (vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS) {
-//            throw std::runtime_error("failed to create image views!");
-//        }
+        swapChainImageViews[i] = createImageView(swapChainImages[i], swapChainImageFormat,
+                                                 VK_IMAGE_ASPECT_COLOR_BIT);
     }
 }
 
 void MyApplication::cleanupSwapChain() {
+    //清理深度缓冲
+    vkDestroyImageView(device, depthImageView, nullptr);
+    vkDestroyImage(device, depthImage, nullptr);
+    vkFreeMemory(device, depthImageMemory, nullptr);
     for (auto framebuffer: swapChainFramebuffers) {
         vkDestroyFramebuffer(device, framebuffer, nullptr);
     }
@@ -1094,7 +1105,8 @@ void MyApplication::createDescriptorSets() {
         descriptorWrites[1].descriptorCount = 1;
         descriptorWrites[1].pImageInfo = &imageInfo;
         //更新描述符
-        vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+        vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()),
+                               descriptorWrites.data(), 0, nullptr);
     }
 }
 
@@ -1331,10 +1343,11 @@ void MyApplication::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t w
 }
 
 void MyApplication::createTextureImageView() {
-    textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+    textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB,
+                                       VK_IMAGE_ASPECT_COLOR_BIT);
 }
 
-VkImageView MyApplication::createImageView(VkImage image, VkFormat format) {
+VkImageView MyApplication::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags) {
     //subresourceRange 字段描述图像的用途以及应访问图像的哪个部分。我们的图像将用作颜色目标，无需任何 mipmap 级别或多个图层。
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -1343,15 +1356,9 @@ VkImageView MyApplication::createImageView(VkImage image, VkFormat format) {
     //viewType 参数允许您将图像视为 1D 纹理、2D 纹理、3D 纹理和立方体贴图。
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     viewInfo.format = format;
-
-    //components 字段允许您重排颜色通道。例如，可以将所有通道映射到单色纹理的红色通道。您还可以将 0 和 1 的常量值映射到通道
-    viewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-    viewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-    viewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-    viewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+    viewInfo.subresourceRange.aspectMask = aspectFlags;
 
     //subresourceRange 字段描述图像的用途以及应访问图像的哪个部分。我们的图像将用作颜色目标，无需任何 mipmap 级别或多个图层。
-    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     viewInfo.subresourceRange.baseMipLevel = 0;
     viewInfo.subresourceRange.levelCount = 1;
     viewInfo.subresourceRange.baseArrayLayer = 0;
@@ -1411,4 +1418,47 @@ void MyApplication::createTextureSampler() {
     if (vkCreateSampler(device, &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
         throw std::runtime_error("failed to create texture sampler!");
     }
+}
+
+void MyApplication::createDepthResources() {
+    //查找深度格式
+    VkFormat depthFormat = findDepthFormat();
+    createImage(swapChainExtent.width, swapChainExtent.height,
+                depthFormat, VK_IMAGE_TILING_OPTIMAL,
+                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                depthImage, depthImageMemory);
+    depthImageView = createImageView(depthImage, depthFormat,
+                                     VK_IMAGE_ASPECT_DEPTH_BIT);
+}
+
+VkFormat MyApplication::findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling,
+                                            VkFormatFeatureFlags features) {
+    //格式的支持取决于平铺模式和用法
+    for (VkFormat format: candidates) {
+        VkFormatProperties props;
+        vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
+
+        //检查的那个取决于函数的 tiling 参数
+        if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
+            return format;
+        } else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
+            return format;
+        }
+    }
+
+    //没有任何候选格式支持所需的用法，那么我们可以返回一个特殊值或简单地抛出一个异常
+    throw std::runtime_error("failed to find supported format!");
+}
+
+VkFormat MyApplication::findDepthFormat() {
+    return findSupportedFormat(
+            {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
+             VK_FORMAT_D24_UNORM_S8_UINT},
+            VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+    );
+}
+
+bool MyApplication::hasStencilComponent(VkFormat format) {
+    return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 }
